@@ -1,0 +1,251 @@
+---
+title: "Reach OPT MSNA 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE,comment = NA, message = FALSE, warning=FALSE, fig.align = 'center' )
+```
+```{r, include=FALSE}
+library(dplyr)
+library(lubridate)
+library(readxl)
+library(kableExtra)
+library(knitr)
+library(readr)
+library(openxlsx)
+library(sf)
+library(raster)
+library(Hmisc)
+source("functions/audit_function_full.R")
+source("functions/function_handler.R")
+
+WGS84 <- crs("+init=epsg:4326")
+UTM38N <- crs("+init=epsg:32638")
+
+assessment_start_date <- as.Date("2021-05-17")
+
+# set min time and max # interviews per day
+
+time_limit <- 15
+flag_time_limit <- 30
+max_interv <- 10
+
+# read data from excel file
+##df <- read_excel("input/raw_data/Final__V10__REACH_oPt_Kobo_MSNA_May_2021_V8_27052021_-_all_versions_-_False_-_2021-06-07-08-58-28.xlsx", sheet = "MSNA_I_2021")
+  
+df <- read_excel("input/raw_data/Final__V10__REACH_oPt_Kobo_MSNA_May_2021_V8_27052021_-_all_versions_-_False_-_2021-06-07-08-58-28.xlsx", sheet = "MSNA_I_2021")
+
+  ###########################################################################################################
+# time check from audit files
+# today
+df$today <- as.Date(df$start, "%Y-%m-%d")
+
+df <- time_check_audit(audit_dir_path = "audit/", df,  "_uuid", time_limit = time_limit)
+
+
+# df <- time_check(df, time_limit)
+df <- df %>% 
+  mutate(time_validity = case_when(interview_duration < flag_time_limit & 
+                                     interview_duration > time_limit ~ "Flagged", TRUE ~ time_validity))
+
+###########################################################################################################
+
+# when survey does not continue to hh member calculation, these surveys are not valid
+
+df <- df %>% 
+  mutate(not_eligible = case_when(is.na(hh_size) ~ "yes",
+                                      TRUE ~ "no"))
+
+# remove ineligible surveys
+df %<>% filter(consent == "yes" & not_eligible == "no")
+```
+```{r,include=FALSE}
+########## SAMPLE FRAMES ########################
+# 
+westbank_sample <- read_csv("input/sample/Final_sampling_frame_WestBank_95_9_CS 8_B 15.csv")
+
+westbank_sample <- westbank_sample %>% 
+                    rename(num_surveys = "Survey")
+
+westbank_sample_summarized <- westbank_sample %>% 
+                    group_by(gov_name) %>% 
+                    summarise(num_surveys = sum(num_surveys))
+                    
+                     
+                  
+
+gaza_sample <- read_csv("input/sample/Final_sampling_summary_Gaza.csv") 
+
+gaza_sample_summarized <- gaza_sample %>% 
+                          rename(num_surveys = "# surveys") %>% 
+                          group_by(Stratification) %>% 
+                          summarise(num_surveys = sum(num_surveys))
+                          
+
+east_Jerusalem_sample <- read_excel("input/sample/Final_sampling_frame_EJ_95_9_CS 5_B 15.xlsx")
+ej_summarized_sample <- east_Jerusalem_sample %>% 
+                        rename(num_surveys = "Survey") %>% 
+                        group_by(Location) %>% 
+                        summarise(num_surveys = sum(num_surveys))
+  
+
+
+
+```
+
+```{r}
+##########################################################################################
+# Deleted interviews column
+df <- df %>% 
+  mutate(
+    deleted = case_when(
+      time_validity == "Deleted" | consent == "no" | not_eligible == "yes" ~ "yes",
+      TRUE ~ "no"))
+
+```
+
+```{r}
+########################################################################################
+
+### Interview method 
+
+interview_method <- df %>% 
+  dplyr::select(Date = today,
+         Enumerator = enumerator_num,
+         Location = location,
+         interview_type = dc_method) %>% 
+ group_by(Location, interview_type) %>% tally(name = "Number_of_interviews")
+interview_method
+interview_method_date <- df %>% 
+  dplyr::filter(today > assessment_start_date) %>% 
+  dplyr::select(Date = today,
+         Enumerator = enumerator_num,
+         Location = location,
+         interview_type = dc_method) %>% 
+   group_by(interview_type, Date) %>% tally(name = "Number_of_interviews")
+interview_method_date
+
+library(plotly)
+survey_method_graph <- plot_ly(interview_method_date, x = ~Date, y = ~Number_of_interviews, name = 'Number of Interviews Per Day', type = 'scatter', mode = 'lines',
+        line = list(color = 'rgb(205, 12, 24)', width = 4)) 
+# interview_method Wide format
+interview_method_wide <- tidyr::pivot_wider(interview_method, 
+                                            names_from = interview_type, 
+                                            values_from = Number_of_interviews,
+                                            values_fill = list(Number_of_interviews = 0))%>% 
+  dplyr::select(Location, `Face to Face` = in_person, Phone = remote )
+
+interview_method_wide
+```
+```{r}
+### Interview method Westbank 
+
+
+interview_method_wb <- df %>%
+  filter(!is.na(hh_location_wb)) %>% 
+  dplyr::select(Date = today,
+         Enumerator = enumerator_num,
+         Governorate = hh_location_wb,
+         interview_type = dc_method
+  ) %>% 
+ group_by(Governorate, interview_type) %>% tally(name = "Number_of_interviews")
+
+interview_method_wb
+
+interview_method_date_wb <- df %>% 
+  dplyr::filter(today > assessment_start_date & !is.na(hh_location_wb)) %>% 
+  dplyr::select(Date = today,
+         Enumerator = enumerator_num,
+         Governorate = hh_location_wb,
+         interview_type = dc_method) %>% 
+   group_by(interview_type, Date) %>% tally(name = "Number_of_interviews")
+
+interview_method_date_wb
+
+library(plotly)
+survey_method_graph_wb <- plot_ly(interview_method_date_wb, x = ~Date, y = ~Number_of_interviews, name = 'Number of Interviews West Bank', type = 'scatter', mode = 'lines',
+        line = list(color = 'rgb(205, 12, 24)', width = 4)) 
+survey_method_graph_wb
+# interview_method Wide format
+
+interview_method_wide_wb <- tidyr::pivot_wider(interview_method_wb, 
+                                            names_from = interview_type, 
+                                            values_from = Number_of_interviews,
+                                            values_fill = list(Number_of_interviews = 0))
+
+survey_method_graph_wb
+```
+
+```{r}
+### Interview method Gaza
+
+
+interview_method_gaza <- df %>%
+  filter(!is.na(hh_location_gaza)) %>% 
+  dplyr::select(Date = today,
+         Enumerator = enumerator_num,
+         Municipality = hh_location_gaza,
+         interview_type = dc_method
+  ) %>% 
+ group_by(Municipality, interview_type) %>% tally(name = "Number_of_interviews")
+
+interview_method_gaza
+
+interview_method_date_gaza <- df %>% 
+  dplyr::filter(today > assessment_start_date & !is.na(hh_location_gaza)) %>% 
+  dplyr::select(Date = today,
+         Enumerator = enumerator_num,
+         Municipality = hh_location_gaza,
+         interview_type = dc_method) %>% 
+   group_by(interview_type, Date) %>% tally(name = "Number_of_interviews")
+interview_method_date_gaza
+
+library(plotly)
+survey_method_graph_gaza <- plot_ly(interview_method_date_gaza, x = ~Date, y = ~Number_of_interviews, name = 'Number of Interviews Gaza', type = 'scatter', mode = 'lines',
+        line = list(color = 'rgb(205, 12, 24)', width = 4)) 
+survey_method_graph_gaza 
+# interview_method Wide format
+interview_method_wide_gaza <- tidyr::pivot_wider(interview_method_gaza, 
+                                            names_from = interview_type, 
+                                            values_from = Number_of_interviews,
+                                            values_fill = list(Number_of_interviews = 0))
+
+interview_method_wide_gaza
+```
+```{r}
+### Interview method East Jerusalem
+
+
+interview_method_EJ <- df %>%
+  filter(location == "ej") %>% 
+  dplyr::select(Date = today,
+         Enumerator = enumerator_num,
+         Location = location,
+         interview_type = dc_method
+  ) %>% 
+ group_by(Location, interview_type) %>% tally(name = "Number_of_interviews")
+interview_method_EJ
+
+interview_method_date_EJ <- df %>% 
+  dplyr::filter(today > assessment_start_date & location == "ej") %>% 
+  dplyr::select(Date = today,
+         Enumerator = enumerator_num,
+         Location = location,
+         interview_type = dc_method) %>% 
+   group_by(interview_type, Date) %>% tally(name = "Number_of_interviews")
+interview_method_date_EJ
+
+library(plotly)
+survey_method_graph_EJ <- plot_ly(interview_method_date_EJ, x = ~Date, y = ~Number_of_interviews, name = 'Number of Interviews EJ', type = 'scatter', mode = 'lines',
+        line = list(color = 'rgb(205, 12, 24)', width = 4)) 
+survey_method_graph_EJ
+# interview_method Wide format
+interview_method_wide_EJ <- tidyr::pivot_wider(interview_method_EJ, 
+                                            names_from = interview_type, 
+                                            values_from = Number_of_interviews,
+                                            values_fill = list(Number_of_interviews = 0))
+interview_method_wide_EJ
+
+```
+

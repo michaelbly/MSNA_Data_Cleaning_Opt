@@ -1,0 +1,417 @@
+---
+title: "data cleaning logs"
+author: "Evelyn"
+date: "5/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# read data from excel file
+library(readr)
+library(tidyverse)
+
+library(readxl)
+
+df <- read_excel("C:/Users/Evelyn GAKINYA/Documents/2. Data cleaning/data cleaning scripts/input/raw_data/Final__V10__REACH_oPt_Kobo_MSNA_May_2021_V8_27052021_-_all_versions_-_False_-_2021-06-07-08-58-28.xlsx")
+
+##df <- read_csv("input/raw_data/msna_dummy_2021-06-10.csv")
+  
+```
+
+```{r}
+df_1 <- df %>% 
+        mutate(cluster_id = paste(enumeration_area,locality_code,oslo_area, sep = "")) %>% 
+        dplyr::select(enumeration_area, locality_code, oslo_area,cluster_id)
+head(df_1)
+
+```
+
+
+```{r}
+##Flag if HH reports there is a pregnant or lactating HH member, but also no female HH members between 11 and 59 years
+df <- df %>% 
+  mutate(lactating_checked = case_when(preg_lactating == "yes" & ( df$hh_size_girls_11_15 == 0 & df$hh_size_girls_16_17 == 0 & df$hh_size_women_18_29 == 0 & df$hh_size_women_30_64 == 0) ~"Flagged", TRUE ~ "")) 
+  
+```
+```{r}
+
+df1 <- df %>% 
+            dplyr::select(lactating_checked,preg_lactating,hh_size_girls_11_15,hh_size_girls_16_17,hh_size_women_18_29,hh_size_women_30_64)
+head(df1)            
+       
+```
+
+
+```{r}
+##Flag if HH reports they (a) skipped meals, (b) ate less, (c) ran out of food, (d) did not eat or (e) did not eat at all, but also reports they were not worried about food
+library(dplyr)
+df <- df %>% 
+  mutate(lacking_food_check = case_when( lack_enough_food == "yes" & (skipped_meals == "no" | ate_less == "no" | hungry_ddnt_eat == "no" | day_without_eating == "no")  ~ "Flagged", TRUE ~ ""))
+
+```
+```{r}
+df2 <- df %>% 
+        filter(lacking_food_check == "Flagged") %>% 
+       dplyr::select(lacking_food_check,lack_enough_food,skipped_meals,ate_less,hungry_ddnt_eat,day_without_eating)
+head(df2)
+```
+
+```{r}
+##Flag if HH reports a member skipped a meal, but did not (1) eat less or (2) go without eating the whole day
+
+df <- df %>% 
+     mutate(skipped_meals_checked = case_when(skipped_meals == "yes" & (ate_less == "no" | day_without_eating == "no") ~ "Flagged", TRUE~ ""))
+
+```
+```{r}
+df3 <- df %>% 
+          filter(skipped_meals_checked == "Flagged") %>% 
+          dplyr::select(skipped_meals_checked,skipped_meals,ate_less,day_without_eating)
+df3
+```
+
+```{r}
+##Flag if HH reports that a child dropped out of school as a coping strategy for a lack of food, but also reports either (1) having no children in the house or (2) having no children dropped out of school
+df <- df %>% 
+  mutate(childdropout_check = case_when( children_dropout == "yes" & (tot_children == 0 | dropout == 0) ~ "Flagged", TRUE~ ""))
+
+```
+```{r}
+df3 <- df %>% 
+          #filter(childdropout_check == "Flagged") %>% 
+          dplyr::select(childdropout_check,tot_children,dropout)
+head(df3)
+```
+
+
+```{r}
+##Flag if HH reports that a child has gone to work as coping strategy for a lack of food, but also reports either 
+##(1) having no children in the house or (2) having no children working
+
+df <- df %>% 
+  mutate(childlabour_check = case_when( child_labour == "yes" & (tot_children == 0 | under_18_working == "no" ) ~ "Flagged", TRUE~ "")) 
+  
+```
+```{r}
+df4 <- df %>% 
+  filter(childlabour_check == "Flagged") %>% 
+        dplyr::select(childlabour_check,child_labour, tot_children, under_18_working)
+df4
+```
+
+```{r}
+##(1) Flag if HH reports at least one member experiencing psychosocial distress, but reports 0 for both 
+
+df <- df %>% 
+  mutate(pss_check = case_when(hh_member_distress == "yes" &  (child_distress_number == 0 & adult_distress_number  == 0) ~ "Flagged", TRUE~ ""))
+
+```
+```{r}
+df5 <- df %>% 
+        #filter(pss_check == "Flagged") %>% 
+        dplyr::select(hh_member_distress,child_distress_number,adult_distress_number,pss_check)
+df5
+```
+
+
+```{r}
+ #Flag if HH reports more children or adults experiencing symptoms than number of child or adult HH members
+ df<-df %>% 
+   mutate( no_distressed_checked = case_when( child_distress_number > tot_children | adult_distress_number > tot_adults ~ "Flagged", TRUE~ ""))
+
+```
+```{r}
+df6<- df %>%
+        #filter(no_distressed_checked == "Flagged") %>% 
+        dplyr::select(no_distressed_checked,child_distress_number,adult_distress_number,tot_adults, tot_children)
+head(df6)
+```
+
+```{r}
+##if HH reports more children experiencing symptoms than number of child HH members
+df<-df %>% 
+   mutate( child_distressed_checked = case_when( child_distress_number > tot_children  ~ "Flagged", TRUE~ ""))
+```
+```{r}
+df7 <- df %>% 
+        #filter(child_distressed_checked == "Flagged") %>% 
+        dplyr::select(child_distressed_checked,child_distress_number,tot_children)
+head(df7)
+```
+
+```{r}
+#Flag if HH reports more adults experiencing symptoms than number adult HH members
+df<-df %>% 
+   mutate( adult_distressed_checked = case_when(adult_distress_number > tot_adults ~ "Flagged", TRUE~ ""))
+```
+
+```{r}
+df8<- df %>% 
+     filter(grepl("^unprot", drinking_water_source)== TRUE) %>% 
+  dplyr::select(drinking_water_source)
+head(df8)
+```
+
+```{r}
+##Flag if HH reports drinking water comes from unimproved source but domestic water comes from improved
+
+
+df <- df %>% 
+  mutate(drinking_water_check = case_when(grepl("^unpro", df$drinking_water_source)==TRUE & grepl("^pro", df$domestic_water_source)== TRUE ~ "Flagged", TRUE ~ ""))
+
+```
+```{r}
+df9<- df %>% 
+  filter(drinking_water_check == "Flagged") %>% 
+  dplyr::select(drinking_water_source, domestic_water_source, drinking_water_check )
+df9
+```
+```{r}
+##Flag if HH reports that it is unsafe or neither unsafe/safe very unsafe to travel to school, but does not report any protection threats of children
+##Flag also if HH identifies threats to school travel that don't match with protection threats to girls, boys, and CWDs
+df <- df %>%
+     mutate(safety_check = case_when(grepl("unsafe", df$school_safety) & (df$security_concerns_girls == "none" | df$security_concerns_boys == "none" | df$security_concerns_disabled == "none")~ "Flagged", TRUE ~ ""))
+
+```
+
+```{r}
+##Flag if the number of HH member who lost their jobs  temporarily exceeds the total HH size
+
+df <- df %>%
+     mutate(covid_job_checked = case_when(df$covid_loss_job_permanent > hh_size & df$covid_loss_job_temp > df$hh_size ~ "Flagged", TRUE ~ "" ))
+```
+```{r}
+df <- df %>%
+     mutate(covid_permanent_check = case_when(df$covid_loss_job_permanent > df$hh_size ~ "Flagged", TRUE ~ "" ))
+```
+```{r}
+df11 <- df %>% 
+        #filter(covid_job_checked == "Flagged") %>% 
+        dplyr::select(covid_loss_job_permanent,hh_size )
+df11
+```
+
+```{r}
+df <- df %>%
+     mutate(covid_temporary_check = case_when(df$covid_loss_job_temp > df$hh_size ~ "Flagged", TRUE ~ "" ))
+```
+
+```{r}
+##Flag if reported shelter is tent, but HH reports having defects related to windows, floors, or foundation
+df <- df %>%
+      mutate(tent_check = case_when(df$shelter_type_inperson == "tent" & (shelter_issues !="none")~ "Flagged", TRUE ~ "" ))
+```
+```{r}
+df12 <- df %>% 
+      filter(tent_check == "Flagged") %>% 
+       dplyr::select(tent_check, shelter_type_inperson, shelter_issues)
+head(df12)
+```
+
+
+
+```{r}
+##Flag if any expenditure other than food is more than 50% of monthly expenditure
+#df <- df %>%
+   #mutate(expense_check = case_when( (as.numeric(df$water_exp) | as.numeric(df$rent_exp) | as.numeric(df$medical_exp) | #as.numeric(df$fuel_exp)) >= 0.5*(as.numeric(df$tot_expenses))~ "Flagged", TRUE ~ "" ))
+```
+```{r}
+df <- df %>%
+   mutate(expense_check = case_when( df$water_exp | df$rent_exp | df$medical_exp | df$fuel_exp >= 0.5*(df$tot_expenses)~ "Flagged", TRUE ~ "" ))
+```
+
+```{r}
+df13 <- df %>% 
+        #filter(expense_check == "Flagged") %>% 
+        dplyr::select(expense_check, food_exp, water_exp,rent_exp,medical_exp,fuel_exp,tot_expenses)
+head(df13)
+```
+
+
+```{r}
+##if the number of boys working working exceeds the number of children in the household
+df <- df %>%
+  mutate(working_boys_checking = case_when( df$under_18_working_boys > df$tot_boys ~ "Flagged", TRUE ~ ""))
+```
+```{r}
+##Flag if the number of girls working exceeds the number of children in the household
+df <- df %>%
+  mutate(working_girls_checking = case_when( df$under_18_working_girls > df$tot_girls ~ "Flagged", TRUE ~ ""))
+```
+
+```{r}
+##Flag if HH report that any family members worked outside the home in past 30 days, but does not report any income from employment 
+df <- df %>%
+  mutate(employment_check = case_when((df$working_adults == 0 & df$under_18_working == "no") & df$primary_livelihood == "employment" ~ "Flagged", TRUE ~ ""))
+
+```
+```{r}
+df15 <- df %>% 
+        filter(employment_check == "Flagged") %>% 
+        dplyr::select(employment_check,working_adults,under_18_working,primary_livelihood)
+head(df15)
+```
+
+```{r}
+##Flag if HH reports receiving cash assistance in past 30 days, but does not identify cash assistance, NGO/charity assistance, or social service
+df <- df %>%
+   mutate(cash_assistance_check = case_when(df$primary_livelihood == "cash_assistance" & df$aid_type != "cash" ~ "Flagged", TRUE ~ ""))
+```
+
+```{r}
+df16 <- df %>% 
+        filter(cash_assistance_check == "Flagged") %>% 
+        dplyr::select(cash_assistance_check,primary_livelihood,aid_type)
+head(df16)
+```
+
+```{r}
+##flag if gender of respondent is equal to the gender of respondent in gender sensitivity question.
+
+df <- df %>% 
+    mutate(gender_check = case_when(df$gender_respondent_r == df$gender_respondent_r2 ~ "Flagged", TRUE ~ ""))
+```
+
+```{r}
+df17 <- df %>% 
+  filter(gender_check == "Flagged") %>% 
+  dplyr::select(gender_check, gender_respondent_r, gender_respondent_r2)
+df17
+```
+```{r}
+shati
+bureij
+deir_balah_camp
+jabalya_camp
+khan_yunis_camp
+maghazi
+nuseirat_camp
+rafah_camp
+
+```
+
+
+```{r}
+##Flag if selected HH lives in Refugee camp, but municipality selected not a camp
+df <- df %>% 
+      mutate(camp_check = case_when(df$camp == "yes" &  (df$hh_location_gaza != "shati"| df$hh_location_gaza !="bureij" | df$hh_location_gaza != "deir_balah_camp" | df$hh_location_gaza !="jabalya_camp" | df$hh_location_gaza != "khan_yunis_camp"| df$hh_location_gaza != "maghazi"| df$hh_location_gaza != "nuseirat_camp" | df$hh_location_gaza != "rafah_camp" )~ "Flagged", TRUE ~ ""))
+```
+```{r}
+df19 <- df %>% 
+        filter(camp_check == "Flagged") %>% 
+       dplyr::select(camp_check,hh_location_gaza,camp)
+df19
+```
+
+```{r}
+###Flag if the respondents reports going for COVID treatment, but not for COVID testing
+df <- df %>% 
+     mutate(covid_check = case_when( treatment_required == "covid_19_treatment"  &  treatment_required != "covid_19_testing"~ "Flagged", TRUE ~ ""))
+```
+
+```{r}
+df20 <- df %>% 
+      filter(covid_check == "Flagged") %>% 
+     dplyr::select(covid_check,`treatment_required/covid_19_treatment`,`treatment_required/covid_19_testing`, treatment_required)
+df20
+```
+```{r}
+library(Hmisc)
+df <- df %>% 
+     mutate(health_barrier_check = case_when(location == "gaza" & (obstructive_barriers %nin% health_barriers) ~ "Flagged", TRUE ~ ""))
+```
+
+```{r}
+df21 <- df %>% 
+        filter(health_barrier_check == "Flagged") %>% 
+        dplyr::select(health_barrier_check,health_barriers,obstructive_barriers,location)
+head(df21)
+```
+```{r}
+##Flag if HH Size > 20
+df <- df %>% 
+     mutate(hh_size_check = case_when(as.numeric(hh_size) > 20 ~ "Flagged", TRUE ~ ""))
+```
+```{r}
+df22 <- df %>% 
+        filter(hh_size_check == "Flagged") %>% 
+        dplyr::select(hh_size_check,hh_size)
+df22
+```
+```{r}
+##flag if distance_hospital > 150
+
+df <- df %>% 
+      mutate(distance_check = case_when(as.numeric(distance_hospital) > 150 ~ "Flagged", TRUE ~ ""))
+```
+
+```{r}
+df23<- df %>% 
+        #filter(distance_check == "Flagged") %>% 
+        dplyr::select(distance_check,distance_hospital)
+head(df23)
+```
+```{r}
+ ##if remote_learning == dropout
+df <- df %>% 
+      mutate(remote_learning_check = case_when(remote_learning == dropout ~ "Flagged", TRUE ~ ""))
+```
+```{r}
+df24<- df %>% 
+        filter(remote_learning_check == "Flagged") %>% 
+        dplyr::select(remote_learning_check,remote_learning, dropout)
+df24
+```
+```{r}
+##if tot_income == 0
+
+df <- df %>% 
+      mutate(total_income_check = case_when(tot_income == 0 ~ "Flagged", TRUE ~ ""))
+```
+```{r}
+df25<- df %>% 
+        #filter(total_income_check == "Flagged") %>% 
+        dplyr::select(total_income_check,tot_income)
+df25
+```
+```{r}
+##if tot_expenses == 0
+
+df <- df %>% 
+      mutate(total_expense_check = case_when(tot_expenses== 0 ~ "Flagged", TRUE ~ ""))
+```
+
+```{r}
+df26<- df %>% 
+        #filter(total_expense_check == "Flagged") %>% 
+        dplyr::select(total_expense_check,tot_expenses)
+df26
+```
+```{r}
+##if food_exp == 0
+df <- df %>% 
+      mutate(food_exp_check = case_when(food_exp == 0 ~ "Flagged", TRUE ~ ""))
+```
+
+```{r}
+df27<- df %>% 
+        #filter(total_expense_check == "Flagged") %>% 
+        dplyr::select(food_exp_check,food_exp)
+df27
+```
+```{r}
+##if water_exp == 0
+df <- df %>% 
+      mutate(water_exp_check = case_when(water_exp == 0 ~ "Flagged", TRUE ~ ""))
+```
+```{r}
+df28<- df %>% 
+        #filter(total_expense_check == "Flagged") %>% 
+        dplyr::select(water_exp_check,water_exp)
+df28
+```
+

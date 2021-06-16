@@ -1,0 +1,10 @@
+﻿log_number,X_uuid,date_assessment,enumerator_num,question.name,issue,action,changed,old.value,new.value,flag_index
+1,88257ae5-915b-47dc-bd63-ca5d5fd67275,2021-06-15,1,lack_enough_food,"if HH reports they (a) skipped meals, (b) ate less, (c) ran out of food, (d) did not eat or (e) did not eat at all, but also reports they were not worried about food",Flagged,NA,yes,NA,2
+2,4f456c42-008e-4258-9678-aa39ae439953,2021-06-15,58214,lack_enough_food,"if HH reports they (a) skipped meals, (b) ate less, (c) ran out of food, (d) did not eat or (e) did not eat at all, but also reports they were not worried about food",Flagged,NA,yes,NA,2
+3,1ac6edac-0f87-4da6-98b5-262433f06025,2021-06-15,56426,school_safety,"if HH reports that it is unsafe or very unsafe to travel to school, but does not report any protection threats of children",Flagged,NA,neither_unsafe_safe,NA,10
+4,f5d2db5f-0c4e-4fa5-9878-540c33dce778,2021-06-15,1,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,20
+5,be5916ef-994e-4fee-ae13-b7b0920c0211,2021-06-15,1,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,20
+6,4f456c42-008e-4258-9678-aa39ae439953,2021-06-15,58214,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,20
+7,f5d2db5f-0c4e-4fa5-9878-540c33dce778,2021-06-15,1,treatment_required,"if the respondents reports going for COVID treatment, but not for COVID testing",Flagged,NA,covid_19_treatment,NA,21
+8,88257ae5-915b-47dc-bd63-ca5d5fd67275,2021-06-15,1,water_exp ,if water_exp == 0,Flagged,NA,0,NA,29
+9,be5916ef-994e-4fee-ae13-b7b0920c0211,2021-06-15,1,water_exp ,if water_exp == 0,Flagged,NA,0,NA,29

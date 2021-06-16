@@ -139,6 +139,10 @@ interview_method_wide <- tidyr::pivot_wider(interview_method,
 interview_method_wide
 ```
 ```{r}
+```
+
+
+```{r}
 ### Interview method Westbank 
 
 
@@ -246,6 +250,9 @@ interview_method_wide_EJ <- tidyr::pivot_wider(interview_method_EJ,
                                             values_from = Number_of_interviews,
                                             values_fill = list(Number_of_interviews = 0))
 interview_method_wide_EJ
+
+```
+```{r}
 
 ```
 

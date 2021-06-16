@@ -11,23 +11,40 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # read data from excel file
+
 library(readr)
 library(tidyverse)
-
+library(Hmisc)
 library(readxl)
 
-df <- read_excel("C:/Users/Evelyn GAKINYA/Documents/2. Data cleaning/data cleaning scripts/input/raw_data/Final__V10__REACH_oPt_Kobo_MSNA_May_2021_V8_27052021_-_all_versions_-_False_-_2021-06-07-08-58-28.xlsx")
+##df <- read_csv("input/raw_data/Final__V10__REACH_oPt_Kobo_MSNA_May_2021_V8_27052021_-_all_versions_-_False_-_2021-06-07-08-58-28.csv")
 
 ##df <- read_csv("input/raw_data/msna_dummy_2021-06-10.csv")
+
+df <- read_excel("input/raw_data/FINAL_Pilot_V12_REACH_oPt_Kobo_MSNA_June_2021_13062021_-_all_versions_-_False_-_2021-06-16-07-13-11.xlsx")
   
 ```
 
 ```{r}
-df_1 <- df %>% 
-        mutate(cluster_id = paste(enumeration_area,locality_code,oslo_area, sep = "")) %>% 
-        dplyr::select(enumeration_area, locality_code, oslo_area,cluster_id)
-head(df_1)
+library(dplyr)
+df_2 <- df %>% 
+          mutate(cluster_id = if_else(is.na(oslo_area),
+            paste(enumeration_area,locality_code, sep = ""),
+            paste(enumeration_area,locality_code,oslo_area, sep = ""))) %>%
+            dplyr::select(cluster_id,enumeration_area,locality_code, oslo_area )
+head(df_2)
 
+```
+
+
+```{r}
+library(dplyr)
+df_3 <- df %>% 
+          mutate(
+            oslo_area =replace(oslo_area,is.na(oslo_area), "gaza"),
+            cluster_id =paste(enumeration_area,locality_code,oslo_area, sep = "_")) %>%
+            dplyr::select(cluster_id,enumeration_area,locality_code, oslo_area )
+head(df_3)
 ```
 
 
@@ -98,7 +115,7 @@ df <- df %>%
 ```
 ```{r}
 df4 <- df %>% 
-  filter(childlabour_check == "Flagged") %>% 
+  #filter(childlabour_check == "Flagged") %>% 
         dplyr::select(childlabour_check,child_labour, tot_children, under_18_working)
 df4
 ```
@@ -207,7 +224,7 @@ df <- df %>%
 ```
 ```{r}
 df12 <- df %>% 
-      filter(tent_check == "Flagged") %>% 
+      #filter(tent_check == "Flagged") %>% 
        dplyr::select(tent_check, shelter_type_inperson, shelter_issues)
 head(df12)
 ```
@@ -216,12 +233,12 @@ head(df12)
 
 ```{r}
 ##Flag if any expenditure other than food is more than 50% of monthly expenditure
-#df <- df %>%
-   #mutate(expense_check = case_when( (as.numeric(df$water_exp) | as.numeric(df$rent_exp) | as.numeric(df$medical_exp) | #as.numeric(df$fuel_exp)) >= 0.5*(as.numeric(df$tot_expenses))~ "Flagged", TRUE ~ "" ))
+df <- df %>%
+   mutate(expense_check = case_when( (as.numeric(df$water_exp) | as.numeric(df$rent_exp) | as.numeric(df$medical_exp) | as.numeric(df$fuel_exp)) >= 0.5*(as.numeric(df$tot_expenses))~ "Flagged", TRUE ~ "" ))
 ```
 ```{r}
-df <- df %>%
-   mutate(expense_check = case_when( df$water_exp | df$rent_exp | df$medical_exp | df$fuel_exp >= 0.5*(df$tot_expenses)~ "Flagged", TRUE ~ "" ))
+##df <- df %>%
+   ##mutate(expense_check = case_when( df$water_exp | df$rent_exp | df$medical_exp | df$fuel_exp >= 0.5*(df$tot_expenses)~ ##"Flagged", TRUE ~ "" ))
 ```
 
 ```{r}
@@ -282,23 +299,12 @@ df17 <- df %>%
   dplyr::select(gender_check, gender_respondent_r, gender_respondent_r2)
 df17
 ```
-```{r}
-shati
-bureij
-deir_balah_camp
-jabalya_camp
-khan_yunis_camp
-maghazi
-nuseirat_camp
-rafah_camp
-
-```
 
 
 ```{r}
 ##Flag if selected HH lives in Refugee camp, but municipality selected not a camp
 df <- df %>% 
-      mutate(camp_check = case_when(df$camp == "yes" &  (df$hh_location_gaza != "shati"| df$hh_location_gaza !="bureij" | df$hh_location_gaza != "deir_balah_camp" | df$hh_location_gaza !="jabalya_camp" | df$hh_location_gaza != "khan_yunis_camp"| df$hh_location_gaza != "maghazi"| df$hh_location_gaza != "nuseirat_camp" | df$hh_location_gaza != "rafah_camp" )~ "Flagged", TRUE ~ ""))
+      mutate(camp_check = case_when(df$camp == "yes" &  (df$hh_location_gaza != "shati_camp"| df$hh_location_gaza !="bureij_camp" | df$hh_location_gaza != "deir_balah_camp" | df$hh_location_gaza !="jabalya_camp" | df$hh_location_gaza != "khan_yunis_camp"| df$hh_location_gaza != "maghazi_camp"| df$hh_location_gaza != "nuseirat_camp" | df$hh_location_gaza != "rafah_camp" )~ "Flagged", TRUE ~ ""))
 ```
 ```{r}
 df19 <- df %>% 
@@ -320,7 +326,6 @@ df20 <- df %>%
 df20
 ```
 ```{r}
-library(Hmisc)
 df <- df %>% 
      mutate(health_barrier_check = case_when(location == "gaza" & (obstructive_barriers %nin% health_barriers) ~ "Flagged", TRUE ~ ""))
 ```
@@ -413,5 +418,11 @@ df28<- df %>%
         #filter(total_expense_check == "Flagged") %>% 
         dplyr::select(water_exp_check,water_exp)
 df28
+```
+
+```{r}
+##Flag if tot_cwd == 0 and drop_out_reason == "Disability"
+df <- df %>% 
+      mutate(disability_check = case_when( tot_cwd == 0 & drop_out_reason == "Disability" ~ "Flagged", TRUE ~ ""))
 ```
 

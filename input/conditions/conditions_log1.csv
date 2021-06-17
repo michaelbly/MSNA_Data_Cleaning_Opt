@@ -28,4 +28,4 @@ action,df$tot_income == 0,normal,tot_income,if tot_income == 0,df$tot_income,df$
 action,df$tot_expenses == 0,normal,tot_expenses,if tot_expenses == 0,df$tot_expenses,df$total_expense_check,Flagged
 action,df$food_exp == 0,normal,food_exp ,if food_exp == 0,df$food_exp ,df$food_exp_check,Flagged
 action,df$water_exp == 0,normal,water_exp ,if water_exp == 0,df$water_exp ,df$water_exp_check,Flagged
-action,"df$tot_cwd == 0 & df$drop_out_reason == ""Disability""",normal,tot_cwd,"if tot_cwd == 0 and drop_out_reason == ""Disability""",df$tot_cwd,df$disability_check,
+action,"df$tot_cwd == 0 & df$drop_out_reason == ""Disability""",normal,tot_cwd,"if tot_cwd == 0 and drop_out_reason == ""Disability""",df$tot_cwd,df$disability_check,Flagged

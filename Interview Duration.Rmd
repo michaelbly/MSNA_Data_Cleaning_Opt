@@ -31,7 +31,7 @@ time_limit <- 15
 flag_time_limit <- 30
 max_interv <- 10
 
-df <-  read_excel("input/raw_data/FINAL_Pilot_V12_REACH_oPt_Kobo_MSNA_June_2021_13062021_2021-06-16-14-45-28.xlsx")
+df <-  read_excel("input/raw_data/FINAL_Pilot_V12_REACH_oPt_Kobo_MSNA_June_2021_13062021_2021-06-20-05-33-16.xlsx")
 
 ###########################################################################################################
 # time check from audit files
@@ -57,7 +57,7 @@ df <- df %>%
                                   TRUE ~ "no"))
 df$not_eligible
 # import loop data
-indiv_df <- read_excel("input/raw_data/Final__V10__REACH_oPt_Kobo_MSNA_May_2021_V8_27052021_-_all_versions_-_False_-_2021-06-07-08-58-28.xlsx", sheet = "member")
+indiv_df <- read_excel("input/raw_data/FINAL_Pilot_V12_REACH_oPt_Kobo_MSNA_June_2021_13062021_2021-06-20-05-33-16.xlsx", sheet = "member")
 
 indiv_df <- indiv_df %>%
             mutate('_uuid' = '_submission__uuid')
@@ -152,7 +152,8 @@ survey_duration <- today_df %>%
   group_by(Enumerator = enumerator_num) %>% 
   summarise(
     Median_duration = round(median(interview_duration, na.rm = T),0)
-  )
+  ) %>% 
+arrange(desc(Median_duration) )
 survey_duration
 ```
 ```{r}
@@ -173,10 +174,10 @@ bargraph1
 
 
 
-*Surveys with less Than  30 mins*
+*Surveys with less Than  40 mins*
 ```{r}
 duration_less_30 <- today_df %>% 
-  filter(today_df$consent == "yes" & interview_duration <= 30) %>% 
+  filter(today_df$consent == "yes" & interview_duration <= 40) %>% 
   dplyr::select(enumerator_num,interview_duration)
 duration_less_30
 ```

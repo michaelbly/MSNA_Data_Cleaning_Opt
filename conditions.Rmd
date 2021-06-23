@@ -94,7 +94,7 @@ df3
 ```{r}
 ##Flag if HH reports that a child dropped out of school as a coping strategy for a lack of food, but also reports either (1) having no children in the house or (2) having no children dropped out of school
 df <- df %>% 
-  mutate(childdropout_check = case_when( children_dropout == "yes" & (tot_children == 0 | dropout == 0) ~ "Flagged", TRUE~ ""))
+  mutate(childdropout_check = case_when( coping_children_dropout == "yes" & (tot_children == 0 | dropout_num == 0) ~ "Flagged", TRUE~ ""))
 
 ```
 ```{r}
@@ -110,7 +110,7 @@ head(df3)
 ##(1) having no children in the house or (2) having no children working
 
 df <- df %>% 
-  mutate(childlabour_check = case_when( child_labour == "yes" & (tot_children == 0 | under_18_working == "no" ) ~ "Flagged", TRUE~ "")) 
+  mutate(childlabour_check = case_when( coping_child_labour == "yes" & (tot_children == 0 | under_18_working == "no" ) ~ "Flagged", TRUE~ "")) 
   
 ```
 ```{r}
@@ -220,7 +220,7 @@ df <- df %>%
 ```{r}
 ##Flag if reported shelter is tent, but HH reports having defects related to windows, floors, or foundation
 df <- df %>%
-      mutate(tent_check = case_when(df$shelter_type_inperson == "tent" & (shelter_issues !="none")~ "Flagged", TRUE ~ "" ))
+      mutate(tent_check = case_when(df$shelter_type == "tent" & (shelter_issues !="none")~ "Flagged", TRUE ~ "" ))
 ```
 ```{r}
 df12 <- df %>% 
@@ -290,7 +290,7 @@ head(df16)
 ##flag if gender of respondent is equal to the gender of respondent in gender sensitivity question.
 
 df <- df %>% 
-    mutate(gender_check = case_when(df$gender_respondent_r == df$gender_respondent_r2 ~ "Flagged", TRUE ~ ""))
+    mutate(gender_check = case_when(df$gender_respondent == df$gender_respondent ~ "Flagged", TRUE ~ ""))
 ```
 
 ```{r}
@@ -363,7 +363,7 @@ head(df23)
 ```{r}
  ##if remote_learning == dropout
 df <- df %>% 
-      mutate(remote_learning_check = case_when(remote_learning == dropout ~ "Flagged", TRUE ~ ""))
+      mutate(remote_learning_check = case_when(remote_learning == dropout_num ~ "Flagged", TRUE ~ ""))
 ```
 ```{r}
 df24<- df %>% 

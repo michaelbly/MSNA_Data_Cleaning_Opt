@@ -1,4 +1,4 @@
-X,Stratification,municipality,# surveys,# units to assess,Effective sample,% buffer,Confidence level,Error margin,Population,Sampling type,Location
+X,Stratification,Strata,# surveys,# units to assess,Effective sample,% buffer,Confidence level,Error margin,Population,Sampling type,Location
 1,Um Al-Nnaser (Al Qaraya al Badawiya),umm_naser,117,1,106,0.1,0.95,0.09,939,Cluster sampling with size 1 = random sampling,Gaza
 2,Beit Lahiya,beit_hanun,130,1,118,0.1,0.95,0.09,17808,Cluster sampling with size 1 = random sampling,Gaza
 3,Beit Hanun,beit_lahiya,130,1,118,0.1,0.95,0.09,10355,Cluster sampling with size 1 = random sampling,Gaza

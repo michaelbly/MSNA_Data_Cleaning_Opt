@@ -1,4 +1,0 @@
-﻿log_number,X_uuid,date_assessment,enumerator_num,question.name,issue,action,changed,old.value,new.value,flag_index
-1,c438bbbe-132b-4fdf-8407-19b5156239db,2021-05-05,2,lack_enough_food,"if HH reports they (a) skipped meals, (b) ate less, (c) ran out of food, (d) did not eat or (e) did not eat at all, but also reports they were not worried about food",Flagged,NA,yes,NA,2
-2,1f4079f1-1cbe-4001-9180-2c9f7df28657,2021-05-05,2,skipped_meals,"if HH reports a member skipped a meal, but did not (1) eat less or (2) go without eating the whole day",Flagged,NA,yes,NA,3
-3,f7371928-d15d-4851-9f05-52be489720e4,2021-05-06,2,skipped_meals,"if HH reports a member skipped a meal, but did not (1) eat less or (2) go without eating the whole day",Flagged,NA,yes,NA,3

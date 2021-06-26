@@ -1,4 +1,4 @@
-X,Stratification,Strata,# surveys,# units to assess,Effective sample,% buffer,Confidence level,Error margin,Population,Sampling type,Location
+X,Stratification,strata,# surveys,# units to assess,Effective sample,% buffer,Confidence level,Error margin,Population,Sampling type,Location
 1,Um Al-Nnaser (Al Qaraya al Badawiya),umm_naser,117,1,106,0.1,0.95,0.09,939,Cluster sampling with size 1 = random sampling,Gaza
 2,Beit Lahiya,beit_hanun,130,1,118,0.1,0.95,0.09,17808,Cluster sampling with size 1 = random sampling,Gaza
 3,Beit Hanun,beit_lahiya,130,1,118,0.1,0.95,0.09,10355,Cluster sampling with size 1 = random sampling,Gaza
@@ -8,7 +8,7 @@ X,Stratification,Strata,# surveys,# units to assess,Effective sample,% buffer,Co
 7,Gaza,gaza,131,1,119,0.1,0.95,0.09,113259,Cluster sampling with size 1 = random sampling,Gaza
 8,Madinat Ezahra,madinat_ezahra,118,1,107,0.1,0.95,0.09,1024,Cluster sampling with size 1 = random sampling,Gaza
 9,Al Mughraqa ,al_mughraqa,124,1,113,0.1,0.95,0.09,2198,Cluster sampling with size 1 = random sampling,Gaza
-10,Juhor ad Dik,juhor_ad_dik,116,1,105,0.1,0.95,0.09,880,Cluster sampling with size 1 = random sampling,Gaza
+10,Juhor ad Dik,juhor_deik,116,1,105,0.1,0.95,0.09,880,Cluster sampling with size 1 = random sampling,Gaza
 11,An Nuseirat Camp,nuseirat_camp,129,1,117,0.1,0.95,0.09,6391,Cluster sampling with size 1 = random sampling,Gaza
 12,An Nuseirat ,an_nuseirat,130,1,118,0.1,0.95,0.09,11043,Cluster sampling with size 1 = random sampling,Gaza
 13,Al Bureij Camp,bureij_camp,129,1,117,0.1,0.95,0.09,5642,Cluster sampling with size 1 = random sampling,Gaza

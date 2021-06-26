@@ -1,15 +1,15 @@
-X,Stratification,# surveys,# units to assess,Cluster size,Cluster size set,ICC,DESS,Effective sample,% buffer,Confidence level,Error margin,Population,Sampling type,Location
-1,Area_AB,200,25,8,8,0.06,1.42,141,0.15,0.95,0.09,465190,Cluster sampling,West Bank
-2,Bethlehem_C,208,21,9.9,8,0.06,1.534,136,0.15,0.95,0.09,6157,Cluster sampling,West Bank
-3,H2,216,21,10.29,8,0.06,1.5574,139,0.15,0.95,0.09,7712,Cluster sampling,West Bank
-4,Hebron_C,200,24,8.33,8,0.06,1.4398,139,0.15,0.95,0.09,12089,Cluster sampling,West Bank
-5,Jenin_C,208,22,9.45,8,0.06,1.507,138,0.15,0.95,0.09,4122,Cluster sampling,West Bank
-6,Jericho_C,240,15,16,8,0.06,1.9,126,0.15,0.95,0.09,1120,Cluster sampling,West Bank
-7,Jerusalem(j2)_C,208,21,9.9,8,0.06,1.534,136,0.15,0.95,0.09,7583,Cluster sampling,West Bank
-8,Nablus_C,216,19,11.37,8,0.06,1.6222,133,0.15,0.95,0.09,2403,Cluster sampling,West Bank
-9,Qalqilya_C,216,20,10.8,8,0.06,1.588,136,0.15,0.95,0.09,2593,Cluster sampling,West Bank
-10,Ramallah_C,208,21,9.9,8,0.06,1.534,136,0.15,0.95,0.09,5431,Cluster sampling,West Bank
-11,Salfit_C,224,18,12.44,8,0.06,1.6864,133,0.15,0.95,0.09,1872,Cluster sampling,West Bank
-12,Tubas_C,216,11,19.64,8,0.06,2.1184,102,0.15,0.95,0.09,335,Cluster sampling,West Bank
-13,Tulkarem_C,216,19,11.37,8,0.06,1.6222,133,0.15,0.95,0.09,3500,Cluster sampling,West Bank
-14,WB_Camps,555,87,6.38,5,0.06,1.3228,420,0.1,0.95,0.05,20859,Cluster sampling,West Bank
+X,Stratification,strata,# surveys,# units to assess,Cluster size,Cluster size set,ICC,DESS,Effective sample,% buffer,Confidence level,Error margin,Population,Sampling type,Location
+1,Area_AB,Area_AB,200,25,8,8,0.06,1.42,141,0.15,0.95,0.09,465190,Cluster sampling,West Bank
+2,Bethlehem_C,bethlehem_C,208,21,9.9,8,0.06,1.534,136,0.15,0.95,0.09,6157,Cluster sampling,West Bank
+3,H2,H2,216,21,10.29,8,0.06,1.5574,139,0.15,0.95,0.09,7712,Cluster sampling,West Bank
+4,Hebron_C,hebron_C,200,24,8.33,8,0.06,1.4398,139,0.15,0.95,0.09,12089,Cluster sampling,West Bank
+5,Jenin_C,jenin_C,208,22,9.45,8,0.06,1.507,138,0.15,0.95,0.09,4122,Cluster sampling,West Bank
+6,Jericho_C,jericho_C,240,15,16,8,0.06,1.9,126,0.15,0.95,0.09,1120,Cluster sampling,West Bank
+7,Jerusalem(j2)_C,jerusalem_2_C,208,21,9.9,8,0.06,1.534,136,0.15,0.95,0.09,7583,Cluster sampling,West Bank
+8,Nablus_C,nablus_C,216,19,11.37,8,0.06,1.6222,133,0.15,0.95,0.09,2403,Cluster sampling,West Bank
+9,Qalqiliya_C,qalqiliya_C,216,20,10.8,8,0.06,1.588,136,0.15,0.95,0.09,2593,Cluster sampling,West Bank
+10,Ramallah_C,ramallah_C,208,21,9.9,8,0.06,1.534,136,0.15,0.95,0.09,5431,Cluster sampling,West Bank
+11,Salfit_C,salfit_C,224,18,12.44,8,0.06,1.6864,133,0.15,0.95,0.09,1872,Cluster sampling,West Bank
+12,Tubas_C,tubas_C,216,11,19.64,8,0.06,2.1184,102,0.15,0.95,0.09,335,Cluster sampling,West Bank
+13,Tulkarm_C,tulkarm_C,216,19,11.37,8,0.06,1.6222,133,0.15,0.95,0.09,3500,Cluster sampling,West Bank
+14,WB_Camps,wb_Camps,555,87,6.38,5,0.06,1.3228,420,0.1,0.95,0.05,20859,Cluster sampling,West Bank

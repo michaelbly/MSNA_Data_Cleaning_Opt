@@ -1,7 +1,17 @@
 ---
 title: "Reach OPT MSNA 2021"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
+
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, cache = FALSE,comment = NA, message = FALSE, warning=FALSE, fig.align = 'center' )
@@ -23,7 +33,7 @@ source("functions/function_handler.R")
 WGS84 <- crs("+init=epsg:4326")
 UTM38N <- crs("+init=epsg:32638")
 
-assessment_start_date <- as.Date("2021-05-17")
+assessment_start_date <- as.Date("2021-06-16")
 
 # set min time and max # interviews per day
 
@@ -34,7 +44,7 @@ max_interv <- 10
 # read data from excel file
 ##df <- read_excel("input/raw_data/Final__V10__REACH_oPt_Kobo_MSNA_May_2021_V8_27052021_-_all_versions_-_False_-_2021-06-07-08-58-28.xlsx", sheet = "MSNA_I_2021")
   
-df <- read_excel("input/raw_data/Final__V10__REACH_oPt_Kobo_MSNA_May_2021_V8_27052021_-_all_versions_-_False_-_2021-06-07-08-58-28.xlsx", sheet = "MSNA_I_2021")
+df <- read_excel("input/raw_data/FINAL_Pilot_V12_REACH_oPt_Kobo_MSNA_June_2021_13062021_2021-06-20-05-33-16.xlsx", sheet = "MSNA_I_2021")
 
   ###########################################################################################################
 # time check from audit files
@@ -59,42 +69,55 @@ df <- df %>%
 
 # remove ineligible surveys
 df %<>% filter(consent == "yes" & not_eligible == "no")
-```
-```{r,include=FALSE}
+
 ########## SAMPLE FRAMES ########################
 # 
-westbank_sample <- read_csv("input/sample/Final_sampling_frame_WestBank_95_9_CS 8_B 15.csv")
+westbank_sample_df <- read_csv("input/sample/Final_sampling_frame_WestBank_95_9_CS 8_B 15.csv")
 
-westbank_sample <- westbank_sample %>% 
-                    rename(num_surveys = "Survey")
-
-westbank_sample_summarized <- westbank_sample %>% 
-                    group_by(gov_name) %>% 
+westbank_sample_df_summarized <- westbank_sample_df %>% 
+                    rename(num_surveys = "Survey") %>% 
+                    group_by(strata) %>% 
                     summarise(num_surveys = sum(num_surveys))
+
+
+#westbank_sample_df_summarized <- write.csv(westbank_sample_df_summarized, sprintf("input/sample/westbank_sample_df_summarized_%s.csv", today()), row.names = FALSE)
                     
                      
                   
 
-gaza_sample <- read_csv("input/sample/Final_sampling_summary_Gaza.csv") 
+gaza_sample_df <- read_csv("input/sample/Final_sampling_summary_Gaza.csv") 
 
-gaza_sample_summarized <- gaza_sample %>% 
+gaza_sample_df_summarized <- gaza_sample_df %>% 
                           rename(num_surveys = "# surveys") %>% 
-                          group_by(Stratification) %>% 
+                          group_by(strata) %>% 
                           summarise(num_surveys = sum(num_surveys))
+
+
+#gaza_sample_df_summarized <- write.csv(gaza_sample_df_summarized, sprintf("input/sample/gaza_sample_df_summarized_%s.csv", today()), row.names = FALSE)
                           
 
 east_Jerusalem_sample <- read_excel("input/sample/Final_sampling_frame_EJ_95_9_CS 5_B 15.xlsx")
 ej_summarized_sample <- east_Jerusalem_sample %>% 
                         rename(num_surveys = "Survey") %>% 
-                        group_by(Location) %>% 
+                        group_by(strata) %>% 
                         summarise(num_surveys = sum(num_surveys))
   
 
+#ej_sample_df_summarized <- write.csv(gaza_sample_df_summarized, sprintf("input/sample/ej_sample_df_summarized_%s.csv", today()), row.names = FALSE)
+                          
 
 
-```
+############ add full strata
+######NOTE ::: CHANGE THE OSLO AREA TO REFLECT THE TOOL, A, B, C
+df <- df %>%
+  mutate(across(everything(), as.character)) %>%
+  mutate(strata =
+           case_when(location == "west_bank" & (oslo_area == "area_a" | oslo_area == "area_b") ~ "Area_AB",
+                     location == "west_bank" & oslo_area == "area_c" ~ paste(hh_location_wb, oslo_area, sep = "_"),
+                     location == "gaza" ~ hh_location_gaza,
+                     location == "ej"~ "East_Jerusalem",
+                     TRUE  ~  'H2'))
 
-```{r}
 ##########################################################################################
 # Deleted interviews column
 df <- df %>% 
@@ -103,9 +126,7 @@ df <- df %>%
       time_validity == "Deleted" | consent == "no" | not_eligible == "yes" ~ "yes",
       TRUE ~ "no"))
 
-```
 
-```{r}
 ########################################################################################
 
 ### Interview method 
@@ -128,21 +149,16 @@ interview_method_date
 
 library(plotly)
 survey_method_graph <- plot_ly(interview_method_date, x = ~Date, y = ~Number_of_interviews, name = 'Number of Interviews Per Day', type = 'scatter', mode = 'lines',
-        line = list(color = 'rgb(205, 12, 24)', width = 4)) 
+        line = list(color = 'rgb(205, 12, 24)', width = 4))
+survey_method_graph
 # interview_method Wide format
 interview_method_wide <- tidyr::pivot_wider(interview_method, 
                                             names_from = interview_type, 
                                             values_from = Number_of_interviews,
-                                            values_fill = list(Number_of_interviews = 0))%>% 
-  dplyr::select(Location, `Face to Face` = in_person, Phone = remote )
+                                            values_fill = list(Number_of_interviews = 0))
+
 
 interview_method_wide
-```
-```{r}
-```
-
-
-```{r}
 ### Interview method Westbank 
 
 
@@ -178,10 +194,8 @@ interview_method_wide_wb <- tidyr::pivot_wider(interview_method_wb,
                                             values_from = Number_of_interviews,
                                             values_fill = list(Number_of_interviews = 0))
 
-survey_method_graph_wb
-```
+interview_method_wide_wb
 
-```{r}
 ### Interview method Gaza
 
 
@@ -216,8 +230,7 @@ interview_method_wide_gaza <- tidyr::pivot_wider(interview_method_gaza,
                                             values_fill = list(Number_of_interviews = 0))
 
 interview_method_wide_gaza
-```
-```{r}
+
 ### Interview method East Jerusalem
 
 
@@ -251,8 +264,321 @@ interview_method_wide_EJ <- tidyr::pivot_wider(interview_method_EJ,
                                             values_fill = list(Number_of_interviews = 0))
 interview_method_wide_EJ
 
+
+## Tracking by Location:: West Bank
+
+westbank_sample_inperson <- westbank_sample_df_summarized %>% 
+                          dplyr::select(strata, Sample = num_surveys)
+westbank_sample_inperson
+
+
+westbank_tracking_inperson <- df %>% 
+                              dplyr::filter(dc_method == "in_person" & location == "west_bank" | location == "H2") %>% 
+                              dplyr::group_by(strata) %>% 
+                              dplyr::summarise(Submissions = n(),
+                              Short_intv = sum(time_validity == "Deleted", na.rm = T),
+                              Deleted = sum(deleted == "yes", na.rm = T),
+                              Accepted = sum(deleted == "no", na.rm = T)
+                              )
+westbank_tracking_inperson
+
+
+westbank_tracking_merged_in_person <- left_join(westbank_sample_inperson, westbank_tracking_inperson, by = "strata") %>% 
+  mutate(
+    Remaining =  case_when(
+      is.na(Accepted) ~ Sample,
+      TRUE ~ (Accepted - Sample) * -1
+    )
+  )
+func <- function(z) if (is.numeric(z)) sum(z, na.rm = T) else ''
+sumrow_in_person <- as.data.frame(lapply(westbank_tracking_merged_in_person, func))
+sumrow_in_person
+westbank_tracking_merged_in_person <- rbind(westbank_tracking_merged_in_person, sumrow_in_person ) %>%
+  mutate_all(
+    funs(replace_na(.,0)))
+westbank_tracking_merged_in_person
+########################################################################################
+
+########################################################################################
+
+## Tracking by Location:: Gaza
+
+gaza_sample_inperson <- gaza_sample_df_summarized %>% 
+                          dplyr::select(strata, Sample = num_surveys)
+gaza_sample_inperson
+
+
+gaza_tracking_inperson <- df %>% 
+                              dplyr::filter(dc_method == "in_person" & location == "gaza") %>% 
+                              dplyr::group_by(strata) %>% 
+                              dplyr::summarise(Submissions = n(),
+                              Short_intv = sum(time_validity == "Deleted", na.rm = T),
+                              Deleted = sum(deleted == "yes", na.rm = T),
+                              Accepted = sum(deleted == "no", na.rm = T)
+                              )
+gaza_tracking_inperson
+
+
+gaza_tracking_merged_in_person <- left_join(gaza_sample_inperson, gaza_tracking_inperson, by = "strata") %>% 
+  mutate(
+    Remaining =  case_when(
+      is.na(Accepted) ~ Sample,
+      TRUE ~ (Accepted - Sample) * -1
+    )
+  )
+func <- function(z) if (is.numeric(z)) sum(z, na.rm = T) else ''
+gaza_sumrow_in_person <- as.data.frame(lapply(gaza_tracking_merged_in_person, func))
+gaza_sumrow_in_person
+gaza_tracking_merged_in_person <- rbind(gaza_tracking_merged_in_person, gaza_sumrow_in_person ) %>%
+  mutate_all(
+    funs(replace_na(.,0)))
+gaza_tracking_merged_in_person
+
+
+## Tracking by Location:: East Jerusalem
+
+EJ_sample_inperson <- ej_summarized_sample %>% 
+                          dplyr::select(strata, Sample = num_surveys)
+EJ_sample_inperson
+
+
+EJ_tracking_inperson <- df %>% 
+                              dplyr::filter(dc_method == "in_person" & location == "ej") %>% 
+                              dplyr::group_by(strata) %>% 
+                              dplyr::summarise(Submissions = n(),
+                              Short_intv = sum(time_validity == "Deleted", na.rm = T),
+                              Deleted = sum(deleted == "yes", na.rm = T),
+                              Accepted = sum(deleted == "no", na.rm = T)
+                              )
+EJ_tracking_inperson
+
+
+EJ_tracking_merged_in_person <- left_join(EJ_sample_inperson, EJ_tracking_inperson, by = "strata") %>% 
+  mutate(
+    Remaining =  case_when(
+      is.na(Accepted) ~ Sample,
+      TRUE ~ (Accepted - Sample) * -1
+    )
+  )
+func <- function(z) if (is.numeric(z)) sum(z, na.rm = T) else ''
+EJ_sumrow_in_person <- as.data.frame(lapply(EJ_tracking_merged_in_person, func))
+EJ_sumrow_in_person
+EJ_tracking_merged_in_person <- rbind(EJ_tracking_merged_in_person, EJ_sumrow_in_person ) %>%
+  mutate_all(
+    funs(replace_na(.,0)))
+EJ_tracking_merged_in_person
+
+########################################################################################
+# Started before date of data collection
+started_before <- df %>% 
+  filter(today < assessment_start_date) %>% 
+  dplyr::select(Date = today,
+         Enumerator = enumerator_num,
+         Location = location)
+started_before
+
+# Enumerator productivity
+
+enumerator_productivity <- df %>% 
+  filter(df$consent == "yes") %>% 
+  group_by(Date = today, Enumerator = enumerator_num) %>% 
+  summarise(Interviews = n())
+
+enumerator_productivity_many <- enumerator_productivity %>% 
+  dplyr::filter(Interviews > max_interv)
+
+enumerator_productivity_less <- enumerator_productivity %>% 
+  dplyr::filter(Interviews < 3)
+
+enumerator_productivity_final <- rbind(enumerator_productivity_many, enumerator_productivity_less)%>% 
+  arrange(desc(Date) )
+
+# Enumerator per survey status 
+
+enumer_per_survey_status <- df %>% 
+  filter(df$consent == "yes") %>% 
+  group_by(Date = today, Enumerator = enumerator_num) %>% 
+  summarise(Accepted = sum(time_validity != "Deleted", na.rm = T),
+            Deleted = sum(time_validity == "Deleted", na.rm = T )
+  )
+enumer_per_survey_status
+
+
+# Survey status per day 
+
+survey_status_per_day <- df %>% 
+    filter(df$consent == "yes") %>% 
+  group_by(Date = today) %>% 
+  summarise(Accepted = sum(time_validity != "Deleted", na.rm = T),
+            Deleted = sum(time_validity == "Deleted", na.rm = T )
+  )
+survey_status_per_day
+
+
+# survey length by enumerator
+
+survey_length <- df %>% 
+    filter(df$consent == "yes") %>% 
+  group_by(Enumerator = enumerator_num) %>% 
+  dplyr::summarise(
+    Median_duration = round(median(as.numeric(df$interview_duration), na.rm = T),0)
+  ) %>% 
+  arrange(desc(Median_duration) )
+  
+
+overall_survey_median <- round(median(as.numeric(df$interview_duration), na.rm = T),0)
+
+survey_length$Overall_median <-  overall_survey_median
+
+# Enumerator with short interv duration
+short_interviews_by_enum <- df %>% 
+  filter(df$consent == "yes" ) %>% 
+  dplyr::filter(interview_duration < time_limit & today > "2021-06-16") %>% 
+  
+  dplyr::select(Date = today, 
+                Enumerator = enumerator_num, 
+                Location = location,
+                Duration =  interview_duration,
+                Interview_Type = dc_method
+  ) %>% mutate(
+    Duration = round(as.numeric(Duration),0),
+  ) %>% 
+  arrange(desc(Date) )
+short_interviews_by_enum
 ```
-```{r}
+
+<center> **Data Collection Monitoring Report** </center>
+
+
+# {.tabset}
+
+***
+## Progress Statistics
+
+<center>**Number surveys per day of data collection** </center> </br>
+
+```{r eval=TRUE, echo=FALSE, results='asis'}
+kable(survey_status_per_day)%>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),fixed_thead = T, full_width = F)
+```
+<center>**Interview Method - Completed Interviews**</center> </br>
+
+```{r eval=TRUE, echo=FALSE, results='asis'}
+
+kable(interview_method_wide)%>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),fixed_thead = T, full_width = F)
+```
+***
+
+## Enumerator Productivity
+
+<center>**Number of surveys per day by enumerator** </center> </br>
+
+```{r eval=TRUE, echo=FALSE, results='asis'}
+
+DT::datatable(enumer_per_survey_status,
+              options = list(
+                  pageLength = 2000,
+                  dom = 'ft'
+                )
+  ) %>% 
+  DT::formatStyle('Deleted',  color = 'red', fontWeight = 'bold') %>% 
+  DT::formatStyle('Accepted',  color = 'green', fontWeight = 'bold')
 
 ```
+
+
+## General Checks  
+
+<center>**surveys collected in under `r time_limit` minutes - last 7 days** </center> </br>
+  
+```{r eval=TRUE, echo=FALSE, results='asis'}
+kable(short_interviews_by_enum)%>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),fixed_thead = T, full_width = F)
+```
+
+***
+
+<center>**Surveyors with very low or high productivity** </center> </br>
+
+```{r eval=TRUE, echo=FALSE, results='asis'}
+kable(enumerator_productivity_final)%>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),fixed_thead = T, full_width = F)
+```
+
+***
+
+
+
+<center>**Median interview duration by enumerator** </center> </br>
+
+```{r eval=TRUE, echo=FALSE, results='asis'}
+kable(survey_length)%>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),fixed_thead = T, full_width = F)
+```
+<center>**Surveys made before the first day of data collection (**`r assessment_start_date`**)**</center> </br>
+
+```{r eval=TRUE, echo=FALSE, results='asis'}
+kable(started_before)%>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),fixed_thead = T, full_width = F)
+```
+
+
+***
+
+
+## West Bank Interviews Tracking
+
+```{r eval=TRUE, echo=FALSE, results='asis'}
+DT::datatable(westbank_tracking_merged_in_person,
+              options = list(
+                  pageLength = 130,
+                  dom = 'ft'
+                )
+              ) %>% 
+  DT::formatStyle('Deleted',  color = 'red', fontWeight = 'bold') %>% 
+  DT::formatStyle('Accepted',  color = 'green', fontWeight = 'bold') %>% 
+  DT::formatStyle('Short_intv',  color = 'red', fontWeight = 'bold') %>%
+  DT::formatStyle('Remaining', fontWeight = 'bold')
+```
+
+## Gaza Interviews Tracking
+
+```{r eval=TRUE, echo=FALSE, results='asis'}
+DT::datatable(gaza_tracking_merged_in_person,
+              options = list(
+                  pageLength = 130,
+                  dom = 'ft'
+                )
+              ) %>% 
+  DT::formatStyle('Deleted',  color = 'red', fontWeight = 'bold') %>% 
+  DT::formatStyle('Accepted',  color = 'green', fontWeight = 'bold') %>% 
+  DT::formatStyle('Short_intv',  color = 'red', fontWeight = 'bold') %>%
+  DT::formatStyle('Remaining', fontWeight = 'bold')
+```
+
+## East Jerusalem Interviews Tracking
+
+```{r eval=TRUE, echo=FALSE, results='asis'}
+DT::datatable(EJ_tracking_merged_in_person,
+              options = list(
+                  pageLength = 130,
+                  dom = 'ft'
+                )
+              ) %>% 
+  DT::formatStyle('Deleted',  color = 'red', fontWeight = 'bold') %>% 
+  DT::formatStyle('Accepted',  color = 'green', fontWeight = 'bold') %>% 
+  DT::formatStyle('Short_intv',  color = 'red', fontWeight = 'bold') %>%
+  DT::formatStyle('Remaining', fontWeight = 'bold')
+```
+
+
+
+
+
+
+
+
+
+
 

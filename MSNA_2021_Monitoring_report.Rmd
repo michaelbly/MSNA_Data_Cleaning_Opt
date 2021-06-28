@@ -34,12 +34,12 @@ source("functions/function_handler.R")
 WGS84 <- crs("+init=epsg:4326")
 UTM38N <- crs("+init=epsg:32638")
 
-assessment_start_date <- as.Date("2021-06-16")
+assessment_start_date <- as.Date("2021-06-15")
 
 # set min time and max # interviews per day
 
-time_limit <- 15
-flag_time_limit <- 30
+time_limit <- 10
+flag_time_limit <- 20
 max_interv <- 10
 
 # read data from excel file

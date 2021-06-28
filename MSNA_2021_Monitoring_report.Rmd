@@ -27,6 +27,7 @@ library(openxlsx)
 library(sf)
 library(raster)
 library(Hmisc)
+library(rsconnect)
 source("functions/audit_function_full.R")
 source("functions/function_handler.R")
 

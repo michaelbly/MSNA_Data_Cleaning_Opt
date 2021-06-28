@@ -18,11 +18,12 @@ assessment_start_date <- as.Date("2021-06-16")
 
 # set min time and max # interviews per day
 
-time_limit <- 15
-flag_time_limit <- 30
+time_limit <- 10
+flag_time_limit <- 20
 max_interv <- 10
 
 df <- read_excel("input/raw_data/FINAL_Pilot_V12_REACH_oPt_Kobo_MSNA_June_2021_13062021_2021-06-20-05-33-16.xlsx", sheet = "MSNA_I_2021")
+      
 
 ###########################################################################################################
 # time check from audit files
@@ -35,8 +36,8 @@ df <- time_check(df, time_limit)
 df <- df %>% 
   mutate(time_validity = case_when(interview_duration < flag_time_limit & 
                                      interview_duration > time_limit ~ "Flagged", TRUE ~ time_validity))
-df_raw <- df
-write.xlsx(df_raw, (file = sprintf("output/df_raw_%s.xlsx", today())))
+
+
 
 ###########################################################################################################
 df$time_validity
@@ -46,15 +47,34 @@ df$time_validity
 # when survey does not continue to hh member calculation, these surveys are not valid
 
 df <- df %>% 
-  mutate(not_eligible = case_when(is.na(hh_size) ~ "yes",
-                                  TRUE ~ "no"))
+  mutate(not_eligible = case_when(is.na(hh_size) ~ "yes",TRUE ~ "no"),
+         uuid = `_uuid`,
+         X_uuid = uuid)
+
+
 df$not_eligible
+
+
 # import loop data
-indiv_df <- read_excel("input/raw_data/FINAL_Pilot_V12_REACH_oPt_Kobo_MSNA_June_2021_13062021_2021-06-20-05-33-16.xlsx", sheet = "member")
+indiv_df <- read_excel("input/raw_data/FINAL_Pilot_V12_REACH_oPt_Kobo_MSNA_June_2021_13062021_2021-06-20-05-33-16.xlsx", sheet = "member") %>% 
+            mutate(uuid = `_submission__uuid`,
+                   X_submission__uuid = uuid)
 
-indiv_df <- indiv_df %>%
-            mutate('_uuid' = '_submission__uuid')
+############ add full strata
+######NOTE ::: CHANGE THE OSLO AREA TO REFLECT THE TOOL, A, B, C
+df <- df %>%
+  mutate(across(everything(), as.character)) %>%
+  mutate(strata =
+           case_when(location == "west_bank" & (oslo_area == "area_a" | oslo_area == "area_b") ~ "Area_AB",
+                     location == "west_bank" & oslo_area == "area_c" ~ paste(hh_location_wb, oslo_area, sep = "_"),
+                     location == "gaza" ~ hh_location_gaza,
+                     location == "ej"~ "East_Jerusalem",
+                     TRUE  ~  'H2'))
 
+
+#### df after the time check
+#df_raw <- df
+#write.xlsx(df_raw, (file = sprintf("output/df_raw_%s.xlsx", today())))
 
 ##########################################################################################
 # Deleted interviews column
@@ -75,29 +95,30 @@ df$deleted
 # number of NAs check
 df$NAs <- apply(df,1,FUN=function(x){length(which(is.na(x)))})
 
+###############################################################################
+#DELETE NOTE COLUMNS
+df <- df %>% 
+  dplyr::select(-contains("_note"))
+#############################################################################
+
 ##########################################################################################################
 ### EXPORT FOR DATA CHECKING #############
 
-##df<- df %>% 
-##dplyr::select(-(snowballing_willing:`_gpslocation_precision`))
+
 
 ##### Write to csv for data checking ###################
 write.csv(df, sprintf("output/data_checking/mcna_all_data_%s.csv",today()), row.names = F)
-
-
-
-
 
 ###########################################################################################################
 ###########################################################################################################
 ###########################################################################################################
 # DO CLEANING
 # read cleanimg conditions csv list
-conditionDf_1 <- read.csv("input/conditions/conditions_log1.csv", as.is = TRUE)
+conditionDf <- read.csv("input/conditions/conditions_log.csv", as.is = TRUE)
 
 # return logs
 
-logs <- read_conditions_from_excel_limited_row(df, conditionDf_1);
+logs <- read_conditions_from_excel_limited_row(df, conditionDf);
 
 # create new columns "log_number"
 logs$log_number = seq.int(nrow(logs))
@@ -106,23 +127,28 @@ ordered_df <- logs[order(logs$log_number),]
 readr::write_excel_csv(ordered_df, sprintf("output/cleaning_log/cleaning_log_%s.csv",today()))
 
 # export data with check columns
-logs_as_columns <- read_conditions_from_excel_column(df, conditionDf_1);
+logs_as_columns <- read_conditions_from_excel_column(df, conditionDf);
 write.csv(logs_as_columns, sprintf("output/cleaning_log/data_w_checks/data_checks_%s.csv",today()), row.names = FALSE)
 
 #################################################################################################################
 # read log csv file after AO has indicated decision on flagged data
 log_df <- read.csv(sprintf("output/cleaning_log/cleaning_log_%s.csv",today()), as.is = TRUE)
-replaced_df <- read_logs(df, log_df, conditionDf_1) 
+replaced_df <- read_logs(df, log_df, conditionDf) 
+
+
+replaced_df$deleted
 
 # take uuids of deleted surveys and remove from cleaned dataset
 deleted_surveys <- replaced_df %>% 
-  filter(deleted == "yes")
+                   filter(deleted == "yes")
+
+
 
 deleted_uuids <- deleted_surveys %>% 
-  dplyr::select(`_uuid`, deleted = time_validity)
+  dplyr::select('_uuid', deleted = time_validity)
 
 # ##join with individual data set to remove deleted uuids from loop
-indiv_df <- left_join(indiv_df, deleted_uuids, by = "_uuid") 
+indiv_df <- left_join(indiv_df, deleted_uuids, by = c("_submission__uuid"="_uuid")) 
 
 ###take uuids of deleted loop surveys and remove from cleaned dataset
 deleted_loop <- indiv_df %>% 
@@ -133,25 +159,29 @@ indiv_cleaned <- indiv_df %>%  filter(is.na(deleted))
 # remove deleted surveys from cleaned dataset
 replaced_df %<>% filter(deleted == "no")
 
-### Generating the cluster id
-#replaced_df <- replaced_df %>% 
-#mutate(
-# oslo_area =replace(oslo_area,is.na(oslo_area), "gaza"),
-# cluster_id =paste(enumeration_area,locality_code,oslo_area, sep = "_")) %>%
-# dplyr::select(cluster_id,enumeration_area,locality_code, oslo_area )
 
 # export clean data
 write.csv(replaced_df, sprintf("output/cleaned_data/mcna_data_clean_parent_%s.csv",today()), row.names = FALSE)
 write.csv(indiv_df, sprintf("output/cleaned_data/mcna_data_clean_loop_%s.csv",today()), row.names = FALSE)
 
 # export to one spreadsheet
-mcna_datasets <- replaced_df
+mcna_datasets <- list("MCNA_2021" = replaced_df, "member" = indiv_cleaned)
 write.xlsx(mcna_datasets, (file = sprintf("output/cleaned_data/mcna_data_clean_%s.xlsx", today())))
 
 # export deletion log
-mcna_deleted <- deleted_surveys
+mcna_deleted <- list("MCNA_2021" = deleted_surveys, "member" = deleted_loop)
 write.xlsx(mcna_deleted, (file = sprintf("output/deletion_log/mcna_data_deleted_%s.xlsx", today())))
 
-###get for translation
 
- to_translate <- get_translations(replaced_df)
+
+# export to one spreadsheet
+#mcna_datasets <-
+ # list(
+  #  "MCNA_2021" = replaced_df,
+   # "member" = indiv_cleaned,
+   # "cleaning_log_hh" = log_df,
+    #"deletion_log" = deleted_redacted
+ # )
+
+#write.xlsx(mcna_datasets, (file = sprintf("output/cleaned_data/mcna_data_clean_all_%s.xlsx", today())))
+

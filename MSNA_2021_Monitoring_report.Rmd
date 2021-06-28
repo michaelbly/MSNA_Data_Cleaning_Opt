@@ -113,8 +113,8 @@ ej_summarized_sample <- east_Jerusalem_sample %>%
 df <- df %>%
   mutate(across(everything(), as.character)) %>%
   mutate(strata =
-           case_when(location == "west_bank" & (oslo_area == "area_a" | oslo_area == "area_b") ~ "Area_AB",
-                     location == "west_bank" & oslo_area == "area_c" ~ paste(hh_location_wb, oslo_area, sep = "_"),
+           case_when(location == "west_bank" & (oslo_area == "A" | oslo_area == "B") ~ "Area_AB",
+                     location == "west_bank" & oslo_area == "C" ~ paste(hh_location_wb, oslo_area, sep = "_"),
                      location == "gaza" ~ hh_location_gaza,
                      location == "ej"~ "East_Jerusalem",
                      TRUE  ~  'H2'))
@@ -392,7 +392,9 @@ enumerator_productivity_less <- enumerator_productivity %>%
   dplyr::filter(Interviews < 3)
 
 enumerator_productivity_final <- rbind(enumerator_productivity_many, enumerator_productivity_less)%>% 
-  arrange(desc(Date) )
+  dplyr::select(Enumerator, Interviews) %>% 
+  arrange(desc(Enumerator))
+  
 
 # Enumerator per survey status 
 
@@ -434,7 +436,7 @@ survey_length$Overall_median <-  overall_survey_median
 # Enumerator with short interv duration
 short_interviews_by_enum <- df %>% 
   filter(df$consent == "yes" ) %>% 
-  dplyr::filter(interview_duration < time_limit & today > "2021-06-16") %>% 
+  dplyr::filter(interview_duration < time_limit & today > "2021-06-15") %>% 
   
   dplyr::select(Date = today, 
                 Enumerator = enumerator_num, 
@@ -462,7 +464,7 @@ short_interviews_by_enum
 kable(survey_status_per_day)%>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),fixed_thead = T, full_width = F)
 ```
-<center>**Interview Method - Completed Interviews**</center> </br>
+<center>**Completed Interviews**</center> </br>
 
 ```{r eval=TRUE, echo=FALSE, results='asis'}
 

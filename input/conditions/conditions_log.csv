@@ -1,7 +1,5 @@
 result_column_name,conditions,type,question.name,issue_label,old_value,new_column_name,action_label
 action,"df$preg_lactating == ""yes"" & (df$hh_size_girls_11_15 == 0 & df$hh_size_girls_16_17 == 0 & df$hh_size_women_18_29 == 0 & df$hh_size_women_30_64 == 0)",normal,preg_lactating,"if lactating or pregnant, there should be atleast one HH female member between 11 and 59 yrs",df$preg_lactating,df$lactating_checked,Flagged
-action,"lack_enough_food == ""yes"" & (skipped_meals == ""no"" | ate_less == ""no"" | hungry_ddnt_eat == ""no"" | day_without_eating == ""no"")",normal,lack_enough_food,"if HH reports they (a) skipped meals, (b) ate less, (c) ran out of food, (d) did not eat or (e) did not eat at all, but also reports they were not worried about food",df$lack_enough_food,df$lacking_food_check,Flagged
-action,"df$skipped_meals == ""yes"" & df$ate_less == ""no"" ",normal,skipped_meals,"if HH reports a member skipped a meal, but did not (1) eat less or (2) go without eating the whole day",df$skipped_meals,df$skipped_meals_checked,Flagged
 action,"coping_children_dropout == ""yes"" & (tot_children == 0 | dropout_num == 0)",normal,coping_children_dropout,"if HH reports that a child dropped out of school as a coping strategy for a lack of food, but also reports either having no children in the house or having no children dropped out of school",df$coping_children_dropout,df$childdropout_check,Flagged
 action,"coping_child_labour == ""yes"" & (tot_children == 0 | under_18_working == ""no"" )",normal,coping_child_labour ,"if HH reports that a child has gone to work as coping strategy for a lack of food, but also reports either  having no children in the house or having no children working",df$coping_child_labour ,df$childlabour_check,Flagged
 action,"df$hh_member_distress == ""yes"" &  (df$child_distress_number == 0 & df$adult_distress_number  == 0)",normal,hh_member_distress,"f HH reports at least one member experiencing psychosocial distress, but reports 0 for both ",df$hh_member_distress,df$pss_check,Flagged
@@ -22,7 +20,7 @@ action,"df$location == ""gaza"" & grepl(""_camp"", df$hh_location_gaza)== FALSE 
 action,"df$treatment_required == ""covid_19_treatment""  &  treatment_required != ""covid_19_testing""",normal,treatment_required,"if the respondents reports going for COVID treatment, but not for COVID testing",df$treatment_required,df$covid_check,Flagged
 action,as.numeric(df$hh_size) > 20,normal,hh_size,if HH Size > 20,df$hh_size,df$hh_size_check,Flagged
 action,as.numeric(distance_hospital) > 150,normal,distance_hospital ,if distance_hospital > 150,df$distance_hospital ,df$distance_check,Flagged
-action,df$remote_learning == df$dropout_num,normal,remote_learning ,if remote_learning == dropout,df$remote_learning ,df$remote_learning_check,Flagged
+action,df$remote_learning == df$dropout_num,normal,remote_learning ,if number of children who did remote_learning if equal to the number of children who dropped out,df$remote_learning ,df$remote_learning_check,Flagged
 action,df$tot_income == 0,normal,tot_income,if tot_income == 0,df$tot_income,df$total_income_check,Flagged
 action,df$tot_expenses == 0,normal,tot_expenses,if tot_expenses == 0,df$tot_expenses,df$total_expense_check,Flagged
 action,df$food_exp == 0,normal,food_exp ,if food_exp == 0,df$food_exp ,df$food_exp_check,Flagged

@@ -417,17 +417,17 @@ survey_status_per_day <- df %>%
   )
 survey_status_per_day
 
-
+survey_len <- df %>% 
+  filter(consent == "yes" & enumerator_num == "1") %>% 
+  dplyr::select(interview_duration)
 # survey length by enumerator
-
 survey_length <- df %>% 
     filter(df$consent == "yes") %>% 
   group_by(Enumerator = enumerator_num) %>% 
-  dplyr::summarise(
-    Median_duration = round(median(as.numeric(df$interview_duration), na.rm = T),0)
-  ) %>% 
-  arrange(desc(Median_duration) )
-  
+ summarise(
+    Median_duration = round(median(as.numeric(interview_duration), na.rm = T),0)
+  )%>% 
+  dplyr::arrange(desc(Median_duration) )
 
 overall_survey_median <- round(median(as.numeric(df$interview_duration), na.rm = T),0)
 
@@ -435,7 +435,7 @@ survey_length$Overall_median <-  overall_survey_median
 
 # Enumerator with short interv duration
 short_interviews_by_enum <- df %>% 
-  filter(df$consent == "yes" ) %>% 
+  dplyr::filter(df$consent == "yes" ) %>% 
   dplyr::filter(interview_duration < time_limit & today > "2021-06-15") %>% 
   
   dplyr::select(Date = today, 
@@ -490,6 +490,16 @@ DT::datatable(enumer_per_survey_status,
 
 ```
 
+## Productivity
+
+<center>**Surveyors with very low or high productivity** </center> </br>
+
+```{r eval=TRUE, echo=FALSE, results='asis'}
+kable(enumerator_productivity_final)%>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),fixed_thead = T, full_width = F)
+```
+
+
 
 ## General Checks  
 
@@ -500,14 +510,7 @@ kable(short_interviews_by_enum)%>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),fixed_thead = T, full_width = F)
 ```
 
-***
 
-<center>**Surveyors with very low or high productivity** </center> </br>
-
-```{r eval=TRUE, echo=FALSE, results='asis'}
-kable(enumerator_productivity_final)%>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),fixed_thead = T, full_width = F)
-```
 
 ***
 

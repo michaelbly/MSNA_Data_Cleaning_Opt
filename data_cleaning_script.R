@@ -1,3 +1,4 @@
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(dplyr)
 library(lubridate)
 library(readxl)
@@ -8,6 +9,8 @@ library(openxlsx)
 library(sf)
 library(raster)
 library(Hmisc)
+library(leaflet)
+library(htmlwidgets)
 source("functions/audit_function_full.R")
 source("functions/function_handler.R")
 
@@ -24,6 +27,92 @@ max_interv <- 10
 
 df <- read_excel("input/raw_data/FINAL_Pilot_V12_REACH_oPt_Kobo_MSNA_June_2021_13062021_2021-06-20-05-33-16.xlsx", sheet = "MSNA_I_2021")
       
+###########################################################################################################
+# [GPS] STRATA CHECK
+###########################################################################################################
+# load shape files
+gov_WB <- st_read("input/shapes/Governorates_WB/Governorates_WB.shp") %>% st_transform(crs = 4326)
+oslo <- st_read("input/shapes/Oslo_EJ_NML/Oslo_EJ_NML.shp") %>% st_transform(crs = 4326)
+# load settlements GDB file
+dir.settlements <- "input/shapes/IsraeliSettlements.gdb/"
+layers <- st_layers(dir.settlements)
+settlements_outer <- st_transform(st_read(dir.settlements, layer=layers$name[1]), crs = 4326)
+settlements_builtup <- st_transform(st_read(dir.settlements, layer=layers$name[2]), crs = 4326)
+# merge outer and builup layer
+settlements <- rbind(dplyr::select(settlements_builtup, Name_Eng) %>% rename(Name=Name_Eng),
+                     dplyr::select(settlements_outer, Name))
+settlements <- st_cast(st_union(settlements), "POLYGON")
+
+# keep only samples with GPS coordinates and convert dataframe to sf
+df_wb_sf <- df %>% 
+  filter(location=="west_bank" & !is.na(gpslocation)) %>% 
+  st_as_sf(coords=c("_gpslocation_longitude", "_gpslocation_latitude"), crs = 4326)
+
+# add governorate and oslo information based on GPS coordinates
+df_wb_sf <- st_join(df_wb_sf, dplyr::select(gov_WB, GOVERNORAT))
+df_wb_sf <- st_join(df_wb_sf, dplyr::select(oslo, CLASS))
+# reformat governorate and oslo area
+df_wb_sf <- df_wb_sf %>% 
+  mutate(gps.governorate=tolower(GOVERNORAT),
+         gps.oslo.area=case_when(
+           CLASS=="AREA (A)" ~ "A",
+           CLASS=="AREA (B)" ~ "B",
+           CLASS=="Inferred AREA (C)" ~ "C",
+           CLASS=="Special case" ~ "H2",
+           TRUE ~ CLASS))
+
+# [CHECK] generate map with governorate issues
+df_wb_sf_issues <- filter(df_wb_sf, hh_location_wb!=gps.governorate)
+View(dplyr::select(df_wb_sf_issues, hh_location_wb, oslo_area, gps.governorate, gps.oslo.area))
+map <- leaflet() %>% 
+  addPolygons(data=gov_WB, color = "#0080FF", weight = 1, fillOpacity=0.2, opacity = 0.8, label = gov_WB$GOVERNORAT) %>%
+  addCircles(data = df_wb_sf_issues, stroke = F, fill = T, fillOpacity = 1, radius = 100, fillColor="#FF0000",
+             label=paste0(df_wb_sf_issues$`_index`, ": ", df_wb_sf_issues$hh_location_wb, "-", df_wb_sf_issues$oslo_area)) %>%
+  addTiles()
+saveWidget(map, file="samples_gov.html")
+
+# [CHECK] generate map with oslo.area issues
+df_wb_sf_issues <- filter(df_wb_sf, oslo_area!=gps.oslo.area)
+View(dplyr::select(df_wb_sf_issues, hh_location_wb, oslo_area, gps.governorate, gps.oslo.area))
+map <- leaflet() %>% 
+  addPolygons(data=oslo, 
+              color = c("#0080FF", "#EE00FF", "#33FF00", "#FF9900", "#00ffff", "#ff0000", "#0000ff"), 
+              weight = 1, fillOpacity=0.2, opacity = 0.8, label = oslo$CLASS) %>%
+  addCircles(data = df_wb_sf_issues, stroke = F, fill = T, fillOpacity = 1, radius = 100, fillColor="#FF0000",
+             label=paste0(df_wb_sf_issues$`_index`, ": ", df_wb_sf_issues$hh_location_wb, "-", df_wb_sf_issues$oslo_area)) %>%
+  addTiles()
+saveWidget(map, file="samples_oslo.html")
+
+# generate cleaning log
+df_wb_sf_issues <- df_wb_sf %>% 
+  dplyr::filter(hh_location_wb!=gps.governorate | oslo_area!=gps.oslo.area) %>% 
+  dplyr::select("_uuid", hh_location_wb, gps.governorate, oslo_area, gps.oslo.area) %>% 
+  dplyr::mutate(issue="Sample GPS location is not within the specified strata")
+
+###########################################################################################################
+# [GPS] ADD DISTANCE TO NEAREST SETTLEMEMT
+###########################################################################################################
+# calculate distance
+settlements.idx <- st_nearest_feature(df_wb_sf, settlements)
+settlements.distance <- st_distance(df_wb_sf, settlements[settlements.idx,], by_element=TRUE)
+df_wb_sf$distance.to.nearest.settlement <- settlements.distance
+# add the column to the main dataset
+df <- left_join(df, dplyr::select(st_drop_geometry(df_wb_sf), "_uuid", "distance.to.nearest.settlement"), by="_uuid")
+
+###########################################################################################################
+# [GPS] Generate map with all samples
+###########################################################################################################
+map <- leaflet() %>% 
+  addPolygons(data=gov_WB, color = "#0080FF", weight = 1, fillOpacity=0.2, opacity = 0.8,
+              label = gov_WB$GOVERNORAT) %>%
+  addPolygons(data=settlements, color = "#00FFFF", weight = 1, fillOpacity=0.2, opacity = 0.8) %>%
+  addCircles(data = df_wb_sf, stroke = F, fill = T, fillOpacity = 1, radius = 100, fillColor="#FF0000",
+             label=df_wb_sf$`_index`) %>%
+  addMeasure(primaryLengthUnit = "meters") %>% 
+  addTiles()
+saveWidget(map, file="samples.html")
+
+###########################################################################################################
 
 ###########################################################################################################
 # time check from audit files

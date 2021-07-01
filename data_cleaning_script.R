@@ -66,7 +66,7 @@ df_wb_sf_issues <- filter(df_wb_sf, hh_location_wb!=gps.governorate)
 View(dplyr::select(df_wb_sf_issues, hh_location_wb, oslo_area, gps.governorate, gps.oslo.area))
 map <- leaflet() %>% 
   addPolygons(data=gov_WB, color = "#0080FF", weight = 1, fillOpacity=0.2, opacity = 0.8, label = gov_WB$GOVERNORAT) %>%
-  addCircles(data = df_wb_sf_issues, stroke = F, fill = T, fillOpacity = 1, radius = 100, fillColor="#FF0000",
+  addCircles(data = df_wb_sf_issues, stroke = F, fill = T, fillOpacity = 1, radius = 50, fillColor="#FF0000",
              label=paste0(df_wb_sf_issues$`_index`, ": ", df_wb_sf_issues$hh_location_wb, "-", df_wb_sf_issues$oslo_area)) %>%
   addTiles()
 saveWidget(map, file="samples_gov.html")
@@ -78,16 +78,22 @@ map <- leaflet() %>%
   addPolygons(data=oslo, 
               color = c("#0080FF", "#EE00FF", "#33FF00", "#FF9900", "#00ffff", "#ff0000", "#0000ff"), 
               weight = 1, fillOpacity=0.2, opacity = 0.8, label = oslo$CLASS) %>%
-  addCircles(data = df_wb_sf_issues, stroke = F, fill = T, fillOpacity = 1, radius = 100, fillColor="#FF0000",
+  addCircles(data = df_wb_sf_issues, stroke = F, fill = T, fillOpacity = 1, radius = 50, fillColor="#FF0000",
              label=paste0(df_wb_sf_issues$`_index`, ": ", df_wb_sf_issues$hh_location_wb, "-", df_wb_sf_issues$oslo_area)) %>%
   addTiles()
 saveWidget(map, file="samples_oslo.html")
 
 # generate cleaning log
+issue1 <- "Sample GPS location is not within the specified governorate and Oslo area."
+issue2 <- "Sample GPS location is not within the specified governorate."
+issue3 <- "Sample GPS location is not within the specified Oslo area."
 df_wb_sf_issues <- df_wb_sf %>% 
   dplyr::filter(hh_location_wb!=gps.governorate | oslo_area!=gps.oslo.area) %>% 
-  dplyr::select("_uuid", hh_location_wb, gps.governorate, oslo_area, gps.oslo.area) %>% 
-  dplyr::mutate(issue="Sample GPS location is not within the specified strata")
+  dplyr::select("_uuid", enumerator_num, hh_location_wb, gps.governorate, oslo_area, gps.oslo.area) %>% 
+  dplyr::mutate(issue=case_when(
+    hh_location_wb!=gps.governorate & oslo_area!=gps.oslo.area ~ issue1,
+    hh_location_wb!=gps.governorate ~ issue2,
+    oslo_area!=gps.oslo.area ~ issue3))
 
 ###########################################################################################################
 # [GPS] ADD DISTANCE TO NEAREST SETTLEMEMT
@@ -106,7 +112,7 @@ map <- leaflet() %>%
   addPolygons(data=gov_WB, color = "#0080FF", weight = 1, fillOpacity=0.2, opacity = 0.8,
               label = gov_WB$GOVERNORAT) %>%
   addPolygons(data=settlements, color = "#00FFFF", weight = 1, fillOpacity=0.2, opacity = 0.8) %>%
-  addCircles(data = df_wb_sf, stroke = F, fill = T, fillOpacity = 1, radius = 100, fillColor="#FF0000",
+  addCircles(data = df_wb_sf, stroke = F, fill = T, fillOpacity = 1, radius = 50, fillColor="#FF0000",
              label=df_wb_sf$`_index`) %>%
   addMeasure(primaryLengthUnit = "meters") %>% 
   addTiles()

@@ -1,0 +1,62 @@
+log_number,X_uuid,date_assessment,enumerator_num,question.name,issue,action,changed,old.value,new.value,flag_index
+1,d7663427-879c-48a4-8ab2-a60e60402937,15/06/2021,576,preg_lactating,"if lactating or pregnant, there should be atleast one HH female member between 11 and 59 yrs",Flagged,NA,yes,no,1
+2,ef3907f2-5a5f-48e7-ae4e-67e6f7578fbb,17/06/2021,58645,coping_children_dropout,"if HH reports that a child dropped out of school as a coping strategy for a lack of food, but also reports either having no children in the house or having no children dropped out of school",Flagged,NA,yes,no,2
+3,795bd092-c890-4b94-9e59-9af61f754e90,16/06/2021,51691,coping_child_labour ,"if HH reports that a child has gone to work as coping strategy for a lack of food, but also reports either  having no children in the house or having no children working",Flagged,NA,yes,no,3
+4,2b158973-310e-4079-8547-a678af9081b6,17/06/2021,58214,coping_child_labour ,"if HH reports that a child has gone to work as coping strategy for a lack of food, but also reports either  having no children in the house or having no children working",Flagged,NA,yes,no,3
+5,afc6af58-edfc-41a0-bb8f-63682fb764bd,17/06/2021,4706,coping_child_labour ,"if HH reports that a child has gone to work as coping strategy for a lack of food, but also reports either  having no children in the house or having no children working",Flagged,NA,yes,no,3
+6,5bad0a3b-f65e-4bbd-aecf-851974583d24,16/06/2021,4706,coping_child_labour ,"if HH reports that a child has gone to work as coping strategy for a lack of food, but also reports either  having no children in the house or having no children working",Flagged,NA,yes,no,3
+7,aa51af33-e23f-4ea8-8799-ef6f19599621,17/06/2021,58214,school_safety,"if HH reports that it is unsafe or very unsafe to travel to school, but does not report any protection threats of children",Flagged,NA,unsafe,NA,8
+8,afc6af58-edfc-41a0-bb8f-63682fb764bd,17/06/2021,4706,school_safety,"if HH reports that it is unsafe or very unsafe to travel to school, but does not report any protection threats of children",Flagged,NA,unsafe,NA,8
+9,5bc66598-4ae3-49a2-a8a2-e5a010317274,17/06/2021,4706,school_safety,"if HH reports that it is unsafe or very unsafe to travel to school, but does not report any protection threats of children",Flagged,NA,unsafe,NA,8
+10,1ac6edac-0f87-4da6-98b5-262433f06025,15/06/2021,56426,school_safety,"if HH reports that it is unsafe or very unsafe to travel to school, but does not report any protection threats of children",Flagged,NA,neither_unsafe_safe,NA,8
+11,d1f31fd3-46c4-4b91-8f7e-c50fecce7ce2,16/06/2021,4692,school_safety,"if HH reports that it is unsafe or very unsafe to travel to school, but does not report any protection threats of children",Flagged,NA,unsafe,NA,8
+12,a1434938-89eb-48b5-add0-ff61c7b1d076,16/06/2021,58645,school_safety,"if HH reports that it is unsafe or very unsafe to travel to school, but does not report any protection threats of children",Flagged,NA,unsafe,NA,8
+13,81863783-e150-4a1f-a86e-a7252fb847a7,16/06/2021,52469,school_safety,"if HH reports that it is unsafe or very unsafe to travel to school, but does not report any protection threats of children",Flagged,NA,unsafe,NA,8
+14,d7663427-879c-48a4-8ab2-a60e60402937,15/06/2021,576,shelter_type,"if reported shelter is tent, but HH reports having defects related to windows, floors, or foundation",Flagged,NA,tent,tent,11
+15,c1f0fd34-bf13-41ea-aab7-7eed974621b5,17/06/2021,58541,primary_livelihood,"if HH report that any family members worked outside the home in past 30 days, but does not report any income from employment",Flagged,NA,employment,NA,15
+16,741c420f-df7c-4d97-8b6f-8dcd24db9226,17/06/2021,56426,primary_livelihood,"if HH report that any family members worked outside the home in past 30 days, but does not report any income from employment",Flagged,NA,employment,NA,15
+17,0576d5df-e6c1-446e-b61b-19c40008aeda,17/06/2021,57981,primary_livelihood,"if HH report that any family members worked outside the home in past 30 days, but does not report any income from employment",Flagged,NA,employment,NA,15
+18,fffd401d-7b32-478d-8ebb-f055959b4358,17/06/2021,3,primary_livelihood,"if HH report that any family members worked outside the home in past 30 days, but does not report any income from employment",Flagged,NA,employment,NA,15
+19,a1434938-89eb-48b5-add0-ff61c7b1d076,16/06/2021,58645,primary_livelihood,"if HH report that any family members worked outside the home in past 30 days, but does not report any income from employment",Flagged,NA,employment,NA,15
+20,eb5b9247-443a-485d-a658-feb57d287f3b,17/06/2021,56426,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,18
+21,741c420f-df7c-4d97-8b6f-8dcd24db9226,17/06/2021,56426,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,18
+22,8bb9d29b-1f6c-41fa-a96f-0d2c6d1dc6df,17/06/2021,56426,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,18
+23,b10e831a-abb3-40d8-b3d3-8dba2c5a3e73,17/06/2021,56426,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,18
+24,3ce793f2-2625-4e5b-93fd-01c3c899887b,17/06/2021,56426,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,18
+25,d7663427-879c-48a4-8ab2-a60e60402937,15/06/2021,576,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,18
+26,bbe9e380-0078-4804-b9ce-a3198b953de1,15/06/2021,56426,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,18
+27,2431dc3d-9228-466e-a496-6467b704a4b2,16/06/2021,56426,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,18
+28,c81dcc08-91d3-4c60-b05d-588b88790b50,16/06/2021,56426,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,18
+29,8450c50c-73b5-4726-88ae-f9241ade3f90,16/06/2021,56426,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,18
+30,67a76b3e-cf3d-47d8-92ae-870daa017eb3,16/06/2021,56426,camp,"if selected HH lives in Refugee camp, but municipality selected not a camp",Flagged,NA,yes,NA,18
+31,f5d2db5f-0c4e-4fa5-9878-540c33dce778,15/06/2021,1,treatment_required,"if the respondents reports going for COVID treatment, but not for COVID testing",Flagged,NA,covid_19_treatment,NA,19
+32,49009640-ed8c-4205-9112-8cb8246edfc2,16/06/2021,2,hh_size,if HH Size > 20,Flagged,NA,33,NA,20
+33,29728500-617f-41a9-9af9-f5b8a837a16a,18/06/2021,4706,hh_size,if HH Size > 20,Flagged,NA,31,NA,20
+34,88dfc4d9-dce7-405e-bd44-4dc28d2bf1e8,15/06/2021,1,remote_learning ,if number of children who did remote_learning if equal to the number of children who dropped out,Flagged,NA,0,NA,22
+35,b15f5d1f-4525-4ae8-b633-aa5fb3e289ae,15/06/2021,4692,remote_learning ,if number of children who did remote_learning if equal to the number of children who dropped out,Flagged,NA,1,NA,22
+36,88257ae5-915b-47dc-bd63-ca5d5fd67275,15/06/2021,1,remote_learning ,if number of children who did remote_learning if equal to the number of children who dropped out,Flagged,NA,0,NA,22
+37,be5916ef-994e-4fee-ae13-b7b0920c0211,15/06/2021,1,remote_learning ,if number of children who did remote_learning if equal to the number of children who dropped out,Flagged,NA,0,NA,22
+38,a5d3f362-e7c1-4ede-835d-2989b64b35f9,16/06/2021,58541,remote_learning ,if number of children who did remote_learning if equal to the number of children who dropped out,Flagged,NA,0,NA,22
+39,bbe9e380-0078-4804-b9ce-a3198b953de1,15/06/2021,56426,remote_learning ,if number of children who did remote_learning if equal to the number of children who dropped out,Flagged,NA,1,NA,22
+40,68919518-9760-432d-a09d-e9fce1427c95,16/06/2021,1,tot_income,if tot_income == 0,Flagged,NA,0,NA,23
+41,3ce793f2-2625-4e5b-93fd-01c3c899887b,17/06/2021,56426,tot_income,if tot_income == 0,Flagged,NA,0,NA,23
+42,e965a991-51d7-4312-a0a8-670c752f8dfb,17/06/2021,2,tot_income,if tot_income == 0,Flagged,NA,0,NA,23
+43,e965a991-51d7-4312-a0a8-670c752f8dfb,17/06/2021,2,tot_expenses,if tot_expenses == 0,Flagged,NA,0,NA,24
+44,e965a991-51d7-4312-a0a8-670c752f8dfb,17/06/2021,2,food_exp ,if food_exp == 0,Flagged,NA,0,NA,25
+45,49009640-ed8c-4205-9112-8cb8246edfc2,16/06/2021,2,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+46,8e2089a4-fa1c-4082-83fc-27902bfc8871,16/06/2021,1,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+47,68919518-9760-432d-a09d-e9fce1427c95,16/06/2021,1,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+48,b35de245-9c17-417c-9966-66eef9f7a027,16/06/2021,58541,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+49,b33f440b-76fc-4d49-bb8f-41df7aa1b37a,17/06/2021,58541,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+50,1861d942-debf-4ab1-b5de-6d803680c9e9,17/06/2021,58214,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+51,f19b8bea-43d7-44f8-b39f-e9dfd9d5311e,17/06/2021,1,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+52,e965a991-51d7-4312-a0a8-670c752f8dfb,17/06/2021,2,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+53,226fafbb-d182-4776-a839-49ad0c7e81ad,17/06/2021,4,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+54,fffd401d-7b32-478d-8ebb-f055959b4358,17/06/2021,3,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+55,5e12792b-a736-46a5-a2d3-11e24f11ef67,17/06/2021,1,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+56,88257ae5-915b-47dc-bd63-ca5d5fd67275,15/06/2021,1,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+57,be5916ef-994e-4fee-ae13-b7b0920c0211,15/06/2021,1,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+58,76119b26-c45c-491d-8d59-fece93d74969,16/06/2021,4706,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+59,a5d3f362-e7c1-4ede-835d-2989b64b35f9,16/06/2021,58541,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+60,516ddb19-6ecf-4989-ae72-fc688dd00cad,16/06/2021,58541,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26
+61,bbe9e380-0078-4804-b9ce-a3198b953de1,15/06/2021,56426,water_exp ,if water_exp == 0,Flagged,NA,0,NA,26

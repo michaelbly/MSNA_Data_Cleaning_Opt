@@ -54,23 +54,53 @@ df$today <- as.Date(df$start, "%Y-%m-%d")
 
 df <- time_check_audit(audit_dir_path = "audit/", df,  "_uuid", time_limit = time_limit)
 
-
-# df <- time_check(df, time_limit)
+df <- time_check(df, time_limit)
 df <- df %>% 
   mutate(time_validity = case_when(interview_duration < flag_time_limit & 
                                      interview_duration > time_limit ~ "Flagged", TRUE ~ time_validity))
 
+
+
 ###########################################################################################################
+df$time_validity
+
+
 
 # when survey does not continue to hh member calculation, these surveys are not valid
 
 df <- df %>% 
-  mutate(not_eligible = case_when(is.na(hh_size) ~ "yes",
-                                      TRUE ~ "no"))
+  mutate(not_eligible = case_when(is.na(hh_size) ~ "yes",TRUE ~ "no"),
+         uuid = `_uuid`,
+         X_uuid = uuid)
 
-# remove ineligible surveys
-df %<>% filter(consent == "yes" & not_eligible == "no")
 
+df$not_eligible
+
+
+############ add full strata
+######NOTE ::: CHANGE THE OSLO AREA TO REFLECT THE TOOL, A, B, C
+df <- df %>%
+  mutate(across(everything(), as.character)) %>%
+  mutate(strata =
+           case_when(location == "west_bank" & (oslo_area == "area_a" | oslo_area == "area_b") ~ "Area_AB",
+                     location == "west_bank" & oslo_area == "area_c" ~ paste(hh_location_wb, oslo_area, sep = "_"),
+                     location == "gaza" ~ hh_location_gaza,
+                     location == "ej"~ "East_Jerusalem",
+                     TRUE  ~  'H2'))
+
+
+#### df after the time check
+#df_raw <- df
+#write.xlsx(df_raw, (file = sprintf("output/df_raw_%s.xlsx", today())))
+
+##########################################################################################
+# Deleted interviews column
+df <- df %>% 
+  mutate(
+    deleted = case_when(
+      time_validity == "Deleted" | consent == "no" | not_eligible == "yes" ~ "yes",
+      TRUE ~ "no"))
+df$deleted
 ########## SAMPLE FRAMES ########################
 # 
 westbank_sample_df <- read_csv("input/sample/Final_sampling_frame_WestBank_95_9_CS 8_B 15.csv")
@@ -269,7 +299,7 @@ interview_method_wide_EJ
 ## Tracking by Location:: West Bank
 
 westbank_sample_inperson <- westbank_sample_df_summarized %>% 
-                          dplyr::select(strata, Sample = num_surveys)
+                          dplyr::select(strata, Max_Surveys = num_surveys)
 westbank_sample_inperson
 
 
@@ -287,17 +317,18 @@ westbank_tracking_inperson
 westbank_tracking_merged_in_person <- left_join(westbank_sample_inperson, westbank_tracking_inperson, by = "strata") %>% 
   mutate(
     Remaining =  case_when(
-      is.na(Accepted) ~ Sample,
-      TRUE ~ (Accepted - Sample) * -1
+      is.na(Accepted) ~ Max_Surveys,
+      TRUE ~ (Accepted - Max_Surveys) * -1
     )
   )
 func <- function(z) if (is.numeric(z)) sum(z, na.rm = T) else ''
 sumrow_in_person <- as.data.frame(lapply(westbank_tracking_merged_in_person, func))
 sumrow_in_person
 westbank_tracking_merged_in_person <- rbind(westbank_tracking_merged_in_person, sumrow_in_person ) %>%
-  mutate_all(
-    funs(replace_na(.,0)))
-westbank_tracking_merged_in_person
+  mutate_all(funs(replace_na(.,0))) %>% 
+  dplyr::mutate(Min_Surveys = round(Max_Surveys*0.85,0))
+westbank_tracking_merged_in_person <- westbank_tracking_merged_in_person %>% 
+          relocate(c("Min_Surveys"), .before = "Max_Surveys")
 ########################################################################################
 
 ########################################################################################
@@ -305,7 +336,7 @@ westbank_tracking_merged_in_person
 ## Tracking by Location:: Gaza
 
 gaza_sample_inperson <- gaza_sample_df_summarized %>% 
-                          dplyr::select(strata, Sample = num_surveys)
+                          dplyr::select(strata, Max_Surveys = num_surveys)
 gaza_sample_inperson
 
 
@@ -323,8 +354,8 @@ gaza_tracking_inperson
 gaza_tracking_merged_in_person <- left_join(gaza_sample_inperson, gaza_tracking_inperson, by = "strata") %>% 
   mutate(
     Remaining =  case_when(
-      is.na(Accepted) ~ Sample,
-      TRUE ~ (Accepted - Sample) * -1
+      is.na(Accepted) ~ Max_Surveys,
+      TRUE ~ (Accepted - Max_Surveys) * -1
     )
   )
 func <- function(z) if (is.numeric(z)) sum(z, na.rm = T) else ''
@@ -332,14 +363,17 @@ gaza_sumrow_in_person <- as.data.frame(lapply(gaza_tracking_merged_in_person, fu
 gaza_sumrow_in_person
 gaza_tracking_merged_in_person <- rbind(gaza_tracking_merged_in_person, gaza_sumrow_in_person ) %>%
   mutate_all(
-    funs(replace_na(.,0)))
+    funs(replace_na(.,0))) %>% 
+dplyr::mutate(Min_Surveys = round(Max_Surveys*0.90,0))
+gaza_tracking_merged_in_person <- gaza_tracking_merged_in_person %>% 
+          relocate(c("Min_Surveys"), .before = "Max_Surveys")
 gaza_tracking_merged_in_person
 
 
 ## Tracking by Location:: East Jerusalem
 
 EJ_sample_inperson <- ej_summarized_sample %>% 
-                          dplyr::select(strata, Sample = num_surveys)
+                          dplyr::select(strata, Max_Surveys = num_surveys)
 EJ_sample_inperson
 
 
@@ -357,8 +391,8 @@ EJ_tracking_inperson
 EJ_tracking_merged_in_person <- left_join(EJ_sample_inperson, EJ_tracking_inperson, by = "strata") %>% 
   mutate(
     Remaining =  case_when(
-      is.na(Accepted) ~ Sample,
-      TRUE ~ (Accepted - Sample) * -1
+      is.na(Accepted) ~ Max_Surveys,
+      TRUE ~ (Accepted - Max_Surveys) * -1
     )
   )
 func <- function(z) if (is.numeric(z)) sum(z, na.rm = T) else ''
@@ -366,7 +400,10 @@ EJ_sumrow_in_person <- as.data.frame(lapply(EJ_tracking_merged_in_person, func))
 EJ_sumrow_in_person
 EJ_tracking_merged_in_person <- rbind(EJ_tracking_merged_in_person, EJ_sumrow_in_person ) %>%
   mutate_all(
-    funs(replace_na(.,0)))
+    funs(replace_na(.,0))) %>% 
+dplyr::mutate(Min_Surveys = round(Max_Surveys*0.85,0))
+EJ_tracking_merged_in_person <- EJ_tracking_merged_in_person %>% 
+          relocate(c("Min_Surveys"), .before = "Max_Surveys")
 EJ_tracking_merged_in_person
 
 ########################################################################################

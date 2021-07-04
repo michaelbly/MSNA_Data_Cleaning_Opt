@@ -8,17 +8,81 @@ library(Hmisc)
 r <- read_excel("input/raw_data/FINAL_Pilot_V12_REACH_oPt_Kobo_MSNA_June_2021_13062021_2021-06-20-05-33-16.xlsx", sheet = "MSNA_I_2021")
 
 ##of interviews conducted with head of household
-r$hh1 <- ifelse(r$hhh_r == "yes", 1,0)
+r$hh1 <- ifelse(r$hhh_r == "yes", 1, 0)
 r$hh1
 table(r$hh1)
 prop.table(table(r$hh1))
 
 ##% of interviews conducted with male or female participants
+r$hh5 <- ifelse(r$gender_respondent == "female", 1, 0)
+r$hh5
+table(r$hh5)
+prop.table(table(r$hh5))
 
+##% of households by sex of household head
+r$hh6 <- case_when( r$sex_head_hh == "female" ~ 1,
+                    r$sex_head_hh == "male" ~ 0,
+                    TRUE ~ NA_real_)
+r$hh6
+table(r$hh6)
+prop.table(table(r$hh6))
 
+##% of interviews conducted according to refugee status of household
 
+r$hh8 <- ifelse(r$refugee_status == "yes", 1, 0)
+r$hh8
+table(r$hh8)
+prop.table(table(r$hh8))
 
+##% of households with at least one member pregnant or lactating
 
+r$hh10 <- ifelse(r$preg_lactating == "yes", 1, 0)
+r$hh10 
+table(r$hh10)
+prop.table(table(r$hh10))
+
+##% of households with at least one member with a chronic disease
+r$chronic_illness
+
+r$hh12 <- ifelse(r$chronic_illness == "yes", 1, 0)
+table(r$hh12)
+prop.table(table(r$hh12))
+
+##% of HHs displaced as a result of the most recent conflict (starting on the 1st of May 2021)
+r$permanent_location
+
+r$hhd1 <- case_when(r$permanent_location == "no" ~ 1,
+                    r$permanent_location %in% c("yes", "do_not_know", "decline_to_answer") ~ 0,
+                    TRUE ~ NA_real_)
+r$hhd1
+table(r$hhd1)
+prop.table(table(r$hhd1))
+
+##% of HHs that have been displaced as a result of the recent conflict, 
+##but have since returned to their previous location
+r$displacement_status
+
+r$hhd2 <- case_when(r$displacement_status == "yes" ~ 1,
+                    r$displacement_status %in% c("no", "do_not_know", "decline_to_answer") ~ 0,
+                    TRUE ~ NA_real_)
+
+r$hhd2
+table(r$hhd2)
+prop.table(table(r$hhd2))
+
+##% of households currently hosting displaced individuals
+r$currently_hosting_displaced
+
+r$hhd3 <- case_when(r$currently_hosting_displaced == "yes" ~ 1,
+                    r$currently_hosting_displaced %in% c("no", "do_not_know", "decline_to_answer") ~ 0,
+                    TRUE ~ NA_real_)
+ 
+r$hhd3 
+table(r$hhd3) 
+prop.table(table(r$hhd3)) 
+ 
+##Average number of displace individuals hosted in host HHs
+r$num_displaced
 
 ## households that can access a functional basic and secondary school within a 30min walk from dwellings
 

@@ -189,7 +189,7 @@ interview_method_wide <- tidyr::pivot_wider(interview_method,
                                             values_fill = list(Number_of_interviews = 0))
 
 
-interview_method_wide
+interview_method_wide <- rename(interview_method_wide, "Number_of_interviews" = "in_person")
 ### Interview method Westbank 
 
 
@@ -431,6 +431,16 @@ enumerator_productivity_less <- enumerator_productivity %>%
 enumerator_productivity_final <- rbind(enumerator_productivity_many, enumerator_productivity_less)%>% 
   dplyr::select(Enumerator, Interviews) %>% 
   arrange(desc(Enumerator))
+
+enum_productivity <- df %>% 
+  filter(df$consent == "yes") %>% 
+  group_by(Enumerator = enumerator_num) %>% 
+  summarise(Interviews = n()) %>% 
+  arrange(desc(Interviews), .by_group = T)
+
+
+
+
   
 
 # Enumerator per survey status 
@@ -510,7 +520,7 @@ kable(interview_method_wide)%>%
 ```
 ***
 
-## Enumerator Productivity
+## Enumerator Progress
 
 <center>**Number of surveys per day by enumerator** </center> </br>
 
@@ -527,12 +537,12 @@ DT::datatable(enumer_per_survey_status,
 
 ```
 
-## Productivity
+##  Enumerator Productivity
 
 <center>**Surveyors with very low or high productivity** </center> </br>
 
 ```{r eval=TRUE, echo=FALSE, results='asis'}
-kable(enumerator_productivity_final)%>%
+kable(enum_productivity)%>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),fixed_thead = T, full_width = F)
 ```
 
